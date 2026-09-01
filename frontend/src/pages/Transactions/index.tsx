@@ -46,10 +46,14 @@ export default function Transactions() {
   }, [])
 
   useEffect(() => {
+    let cancelled = false
     const params: Record<string, string> = {}
     if (filterPeriod) params.period_id = filterPeriod
     if (filterType)   params.type      = filterType
-    getTransactions(params).then(setTransactions)
+    getTransactions(params).then(data => {
+      if (!cancelled) setTransactions(data)
+    })
+    return () => { cancelled = true }
   }, [filterPeriod, filterType])
 
   const requiresCard = methods.find(m => m.id === form.payment_method_id)?.requires_card
@@ -155,9 +159,11 @@ export default function Transactions() {
                 <td className={`${styles.right} ${t.type === 'income' ? styles.success : styles.warning}`}>
                   {t.type === 'income' ? '+' : '-'}{formatCOP(Number(t.amount))}
                 </td>
-                <td className={styles.actions}>
-                  <Button variant="ghost" size="sm" onClick={() => openEdit(t)}>Editar</Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(t.id)}>✕</Button>
+                <td>
+                  <div className={styles.actions}>
+                    <Button variant="ghost" size="sm" onClick={() => openEdit(t)}>Editar</Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(t.id)}>✕</Button>
+                  </div>
                 </td>
               </tr>
             ))}
