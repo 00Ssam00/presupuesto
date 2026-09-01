@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Header from '../../components/layout/Header'
 import Card from '../../components/ui/Card'
-import { getBudgets, upsertBudget, getCategories, getPeriods } from '../../lib/api'
+import { getBudgets, upsertBudget, getCategories, getPeriods, getCurrentPeriod } from '../../lib/api'
 import { formatCOP, pct, clamp } from '../../lib/utils'
 import type { Budget, Period } from '../../types'
 import styles from './Budget.module.css'
@@ -11,12 +11,18 @@ export default function Budget() {
   const [selectedId, setSelectedId] = useState('')
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [editing, setEditing] = useState<Record<string, string>>({})
+  const selectedIdTouched = useRef(false)
 
   useEffect(() => {
-    Promise.all([getPeriods(), getCategories()]).then(([pds]) => {
-      setPeriods(pds)
-      if (pds.length > 0) setSelectedId(pds[0].id)
-    })
+    Promise.all([getPeriods(), getCategories(), getCurrentPeriod().catch(() => null)]).then(
+      ([pds, , current]) => {
+        setPeriods(pds)
+        if (!selectedIdTouched.current) {
+          const id = current?.id || pds[0]?.id || ''
+          if (id) setSelectedId(id)
+        }
+      }
+    )
   }, [])
 
   useEffect(() => {
@@ -40,7 +46,7 @@ export default function Budget() {
       <Header title="Presupuesto" subtitle="Por categoría y quincena" />
 
       <div className={styles.toolbar}>
-        <select value={selectedId} onChange={e => setSelectedId(e.target.value)}>
+        <select value={selectedId} onChange={e => { selectedIdTouched.current = true; setSelectedId(e.target.value) }}>
           {periods.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
         </select>
       </div>

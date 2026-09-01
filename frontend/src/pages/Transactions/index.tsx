@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Header from '../../components/layout/Header'
 import Card from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
@@ -7,7 +7,7 @@ import Modal from '../../components/ui/Modal'
 import FormField from '../../components/ui/FormField'
 import {
   getTransactions, createTransaction, updateTransaction, deleteTransaction,
-  getCategories, getPaymentMethods, getCards, getPeriods
+  getCategories, getPaymentMethods, getCards, getPeriods, getCurrentPeriod
 } from '../../lib/api'
 import { formatCOP, formatDate, todayISO } from '../../lib/utils'
 import type { Transaction, Category, PaymentMethod, Card as CreditCard, Period } from '../../types'
@@ -28,24 +28,31 @@ export default function Transactions() {
 
   const [filterPeriod, setFilterPeriod] = useState('')
   const [filterType, setFilterType] = useState('')
+  const [ready, setReady] = useState(false)
+  const filterPeriodTouched = useRef(false)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Transaction | null>(null)
   const [form, setForm] = useState({ ...EMPTY_FORM })
 
   useEffect(() => {
-    Promise.all([getCategories(), getPaymentMethods(), getCards(), getPeriods()]).then(
-      ([cats, meths, cds, pds]) => {
+    Promise.all([getCategories(), getPaymentMethods(), getCards(), getPeriods(), getCurrentPeriod().catch(() => null)]).then(
+      ([cats, meths, cds, pds, current]) => {
         setCategories(cats)
         setMethods(meths)
         setCards(cds)
         setPeriods(pds)
-        if (pds.length > 0) setFilterPeriod(pds[0].id)
+        if (!filterPeriodTouched.current) {
+          const id = current?.id || pds[0]?.id || ''
+          if (id) setFilterPeriod(id)
+        }
+        setReady(true)
       }
     )
   }, [])
 
   useEffect(() => {
+    if (!ready) return
     let cancelled = false
     const params: Record<string, string> = {}
     if (filterPeriod) params.period_id = filterPeriod
@@ -54,7 +61,7 @@ export default function Transactions() {
       if (!cancelled) setTransactions(data)
     })
     return () => { cancelled = true }
-  }, [filterPeriod, filterType])
+  }, [ready, filterPeriod, filterType])
 
   const requiresCard = methods.find(m => m.id === form.payment_method_id)?.requires_card
 
@@ -111,7 +118,7 @@ export default function Transactions() {
 
       <div className={styles.toolbar}>
         <div className={styles.filters}>
-          <select value={filterPeriod} onChange={e => setFilterPeriod(e.target.value)}>
+          <select value={filterPeriod} onChange={e => { filterPeriodTouched.current = true; setFilterPeriod(e.target.value) }}>
             <option value="">Todas las quincenas</option>
             {periods.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
           </select>
