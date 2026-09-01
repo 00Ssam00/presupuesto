@@ -5,12 +5,11 @@ import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
 import Modal from '../../components/ui/Modal'
 import FormField from '../../components/ui/FormField'
-import {
-  getTransactions, createTransaction, updateTransaction, deleteTransaction,
-  getCategories, getPaymentMethods, getCards, getPeriods, getCurrentPeriod
-} from '../../lib/api'
+import Skeleton from '../../components/ui/Skeleton'
+import { getTransactions, createTransaction, updateTransaction, deleteTransaction } from '../../lib/api'
+import { useReferenceData } from '../../lib/ReferenceDataContext'
 import { formatCOP, formatDate, todayISO } from '../../lib/utils'
-import type { Transaction, Category, PaymentMethod, Card as CreditCard, Period } from '../../types'
+import type { Transaction } from '../../types'
 import styles from './Transactions.module.css'
 
 const EMPTY_FORM = {
@@ -20,15 +19,13 @@ const EMPTY_FORM = {
 }
 
 export default function Transactions() {
+  const { categories, methods, cards, periods, currentPeriod, loading: refLoading } = useReferenceData()
+
   const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [methods, setMethods] = useState<PaymentMethod[]>([])
-  const [cards, setCards] = useState<CreditCard[]>([])
-  const [periods, setPeriods] = useState<Period[]>([])
+  const [txLoading, setTxLoading] = useState(true)
 
   const [filterPeriod, setFilterPeriod] = useState('')
   const [filterType, setFilterType] = useState('')
-  const [ready, setReady] = useState(false)
   const filterPeriodTouched = useRef(false)
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -36,32 +33,25 @@ export default function Transactions() {
   const [form, setForm] = useState({ ...EMPTY_FORM })
 
   useEffect(() => {
-    Promise.all([getCategories(), getPaymentMethods(), getCards(), getPeriods(), getCurrentPeriod().catch(() => null)]).then(
-      ([cats, meths, cds, pds, current]) => {
-        setCategories(cats)
-        setMethods(meths)
-        setCards(cds)
-        setPeriods(pds)
-        if (!filterPeriodTouched.current) {
-          const id = current?.id || pds[0]?.id || ''
-          if (id) setFilterPeriod(id)
-        }
-        setReady(true)
-      }
-    )
-  }, [])
+    if (refLoading) return
+    if (!filterPeriodTouched.current) {
+      const id = currentPeriod?.id || periods[0]?.id || ''
+      if (id) setFilterPeriod(id)
+    }
+  }, [refLoading, currentPeriod, periods])
 
   useEffect(() => {
-    if (!ready) return
+    if (refLoading) return
     let cancelled = false
+    setTxLoading(true)
     const params: Record<string, string> = {}
     if (filterPeriod) params.period_id = filterPeriod
     if (filterType)   params.type      = filterType
     getTransactions(params).then(data => {
-      if (!cancelled) setTransactions(data)
+      if (!cancelled) { setTransactions(data); setTxLoading(false) }
     })
     return () => { cancelled = true }
-  }, [ready, filterPeriod, filterType])
+  }, [refLoading, filterPeriod, filterType])
 
   const requiresCard = methods.find(m => m.id === form.payment_method_id)?.requires_card
 
@@ -144,10 +134,20 @@ export default function Transactions() {
             </tr>
           </thead>
           <tbody>
-            {transactions.length === 0 && (
+            {txLoading && [0, 1, 2, 3, 4, 5].map(i => (
+              <tr key={`sk-${i}`}>
+                <td><Skeleton width="70%" height={14} /></td>
+                <td><Skeleton width={80} height={20} radius="var(--radius-sm)" /></td>
+                <td><Skeleton width="60%" height={14} /></td>
+                <td><Skeleton width={90} height={14} /></td>
+                <td className={styles.right}><Skeleton width={70} height={14} className={styles.skeletonRight} /></td>
+                <td></td>
+              </tr>
+            ))}
+            {!txLoading && transactions.length === 0 && (
               <tr><td colSpan={6} className={styles.empty}>Sin transacciones</td></tr>
             )}
-            {transactions.map(t => (
+            {!txLoading && transactions.map(t => (
               <tr key={t.id}>
                 <td>
                   <div className={styles.desc}>{t.description}</div>

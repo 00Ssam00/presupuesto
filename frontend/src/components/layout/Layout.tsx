@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
+import ToastHost from '../ui/ToastHost'
 import styles from './Layout.module.css'
 
 export default function Layout() {
@@ -11,6 +12,7 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+      <ToastHost />
     </div>
   )
 }

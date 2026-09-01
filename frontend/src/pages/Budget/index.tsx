@@ -1,33 +1,37 @@
 import { useEffect, useRef, useState } from 'react'
 import Header from '../../components/layout/Header'
 import Card from '../../components/ui/Card'
-import { getBudgets, upsertBudget, getCategories, getPeriods, getCurrentPeriod } from '../../lib/api'
+import Skeleton from '../../components/ui/Skeleton'
+import { getBudgets, upsertBudget } from '../../lib/api'
+import { useReferenceData } from '../../lib/ReferenceDataContext'
 import { formatCOP, pct, clamp } from '../../lib/utils'
-import type { Budget, Period } from '../../types'
+import type { Budget } from '../../types'
 import styles from './Budget.module.css'
 
 export default function Budget() {
-  const [periods, setPeriods] = useState<Period[]>([])
+  const { periods, currentPeriod, loading: refLoading } = useReferenceData()
   const [selectedId, setSelectedId] = useState('')
   const [budgets, setBudgets] = useState<Budget[]>([])
+  const [budgetsLoading, setBudgetsLoading] = useState(true)
   const [editing, setEditing] = useState<Record<string, string>>({})
   const selectedIdTouched = useRef(false)
 
   useEffect(() => {
-    Promise.all([getPeriods(), getCategories(), getCurrentPeriod().catch(() => null)]).then(
-      ([pds, , current]) => {
-        setPeriods(pds)
-        if (!selectedIdTouched.current) {
-          const id = current?.id || pds[0]?.id || ''
-          if (id) setSelectedId(id)
-        }
-      }
-    )
-  }, [])
+    if (refLoading) return
+    if (!selectedIdTouched.current) {
+      const id = currentPeriod?.id || periods[0]?.id || ''
+      if (id) setSelectedId(id)
+    }
+  }, [refLoading, currentPeriod, periods])
 
   useEffect(() => {
     if (!selectedId) return
-    getBudgets(selectedId).then(setBudgets)
+    let cancelled = false
+    setBudgetsLoading(true)
+    getBudgets(selectedId).then(data => {
+      if (!cancelled) { setBudgets(data); setBudgetsLoading(false) }
+    })
+    return () => { cancelled = true }
   }, [selectedId])
 
   async function handleSave(b: Budget) {
@@ -40,18 +44,34 @@ export default function Budget() {
   const period = periods.find(p => p.id === selectedId)
   const totalBudgeted = budgets.reduce((s, b) => s + Number(b.amount), 0)
   const totalSpent    = budgets.reduce((s, b) => s + Number(b.spent || 0), 0)
+  const loading = refLoading || budgetsLoading
 
   return (
     <div>
       <Header title="Presupuesto" subtitle="Por categoría y quincena" />
 
       <div className={styles.toolbar}>
-        <select value={selectedId} onChange={e => { selectedIdTouched.current = true; setSelectedId(e.target.value) }}>
-          {periods.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
-        </select>
+        {refLoading
+          ? <Skeleton width={180} height={38} radius="var(--radius-lg)" />
+          : (
+            <select value={selectedId} onChange={e => { selectedIdTouched.current = true; setSelectedId(e.target.value) }}>
+              {periods.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
+            </select>
+          )}
       </div>
 
-      {period && (
+      {loading && (
+        <div className={styles.summary}>
+          {[0, 1, 2].map(i => (
+            <Card key={i}>
+              <Skeleton width={100} height={12} />
+              <Skeleton width={130} height={26} className={styles.skeletonMt} />
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {!loading && period && (
         <div className={styles.summary}>
           <Card>
             <div className={styles.kicker}>Ingreso base</div>
@@ -68,7 +88,24 @@ export default function Budget() {
         </div>
       )}
 
-      <div className={styles.list}>
+      {loading && (
+        <div className={styles.list}>
+          {[0, 1, 2, 3, 4].map(i => (
+            <Card key={i} className={styles.budgetCard}>
+              <div className={styles.cardTop}>
+                <div className={styles.catInfo}>
+                  <Skeleton width={9} height={9} radius="50%" />
+                  <Skeleton width={100} height={14} />
+                </div>
+                <Skeleton width={110} height={14} />
+              </div>
+              <Skeleton width="100%" height={8} radius="var(--radius-sm)" className={styles.skeletonMt} />
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {!loading && <div className={styles.list}>
         {budgets.map(b => {
           const budget = Number(b.amount)
           const spent  = Number(b.spent || 0)
@@ -114,7 +151,7 @@ export default function Budget() {
         {budgets.length === 0 && (
           <p className={styles.empty}>No hay presupuesto configurado para esta quincena.</p>
         )}
-      </div>
+      </div>}
     </div>
   )
 }

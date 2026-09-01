@@ -5,6 +5,7 @@ import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
 import Modal from '../../components/ui/Modal'
 import FormField from '../../components/ui/FormField'
+import Skeleton from '../../components/ui/Skeleton'
 import { getGoals, createGoal, updateGoal, deleteGoal } from '../../lib/api'
 import { formatCOP, pct, clamp } from '../../lib/utils'
 import type { Goal } from '../../types'
@@ -14,11 +15,12 @@ const EMPTY = { name: '', type: 'savings' as 'savings' | 'investment', target_am
 
 export default function Goals() {
   const [goals, setGoals] = useState<Goal[]>([])
+  const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Goal | null>(null)
   const [form, setForm] = useState({ ...EMPTY })
 
-  useEffect(() => { getGoals().then(setGoals) }, [])
+  useEffect(() => { getGoals().then(setGoals).finally(() => setLoading(false)) }, [])
 
   function openNew() { setEditing(null); setForm({ ...EMPTY }); setModalOpen(true) }
   function openEdit(g: Goal) {
@@ -97,17 +99,21 @@ export default function Goals() {
 
       <div className={styles.section}>
         <h2 className={styles.sectionTitle}>Ahorro</h2>
-        {savings.length === 0
-          ? <p className={styles.empty}>Sin metas de ahorro</p>
-          : <div className={styles.grid}>{savings.map(g => <GoalCard key={g.id} g={g} />)}</div>
+        {loading
+          ? <div className={styles.grid}><GoalCardSkeleton /></div>
+          : savings.length === 0
+            ? <p className={styles.empty}>Sin metas de ahorro</p>
+            : <div className={styles.grid}>{savings.map(g => <GoalCard key={g.id} g={g} />)}</div>
         }
       </div>
 
       <div className={styles.section}>
         <h2 className={styles.sectionTitle}>Inversión</h2>
-        {investment.length === 0
-          ? <p className={styles.empty}>Sin metas de inversión</p>
-          : <div className={styles.grid}>{investment.map(g => <GoalCard key={g.id} g={g} />)}</div>
+        {loading
+          ? <div className={styles.grid}><GoalCardSkeleton /></div>
+          : investment.length === 0
+            ? <p className={styles.empty}>Sin metas de inversión</p>
+            : <div className={styles.grid}>{investment.map(g => <GoalCard key={g.id} g={g} />)}</div>
         }
       </div>
 
@@ -140,5 +146,26 @@ export default function Goals() {
         </form>
       </Modal>
     </div>
+  )
+}
+
+function GoalCardSkeleton() {
+  return (
+    <Card className={styles.goalCard}>
+      <div className={styles.goalTop}>
+        <div>
+          <Skeleton width={140} height={16} />
+          <Skeleton width={90} height={12} className={styles.skeletonMt} />
+        </div>
+      </div>
+      <Skeleton width={160} height={20} className={styles.skeletonMt} />
+      <div className={`${styles.progressBar} ${styles.skeletonMt}`}>
+        <Skeleton width="100%" height="100%" radius="999px" />
+      </div>
+      <div className={styles.goalBottom}>
+        <Skeleton width={100} height={12} />
+        <Skeleton width={80} height={20} radius="var(--radius-sm)" />
+      </div>
+    </Card>
   )
 }

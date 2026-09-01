@@ -10,6 +10,10 @@
   pointer-events: none;
 }
 
+.skeletonMt { margin-top: var(--space-2); }
+.skeletonMb { margin-bottom: var(--space-4); }
+.skeletonCenter { margin: 0 auto; }
+
 /* ── Header ── */
 .pageHeader {
   display: flex;

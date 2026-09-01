@@ -16,6 +16,7 @@
 }
 
 .goalCard {}
+.skeletonMt { margin-top: var(--space-2); }
 
 .goalTop {
   display: flex;

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { showToast } from './toast'
 import type {
   Period, Transaction, Category, Budget,
   Goal, UpcomingPayment, Card, PaymentMethod, DashboardData
@@ -7,6 +8,36 @@ import type {
 const api = axios.create({
   baseURL: '/api',
 })
+
+// Las consultas típicas al backend tardan ~0.5-0.75s (la más pesada, el
+// dashboard, tras paralelizar sus queries). Si una solicitud sigue pendiente
+// al triple de ese tiempo (~2s, redondeado), avisamos con un toast en vez de
+// dejar al usuario mirando un skeleton indefinidamente sin explicación.
+const SLOW_REQUEST_MS = 2000
+const pendingSlowTimers = new WeakMap<object, ReturnType<typeof setTimeout>>()
+
+api.interceptors.request.use(config => {
+  const timer = setTimeout(() => {
+    showToast('La conexión está lenta. Seguimos esperando la respuesta del servidor…', 'error')
+  }, SLOW_REQUEST_MS)
+  pendingSlowTimers.set(config, timer)
+  return config
+})
+
+api.interceptors.response.use(
+  response => {
+    const timer = pendingSlowTimers.get(response.config)
+    if (timer) clearTimeout(timer)
+    return response
+  },
+  error => {
+    if (error.config) {
+      const timer = pendingSlowTimers.get(error.config)
+      if (timer) clearTimeout(timer)
+    }
+    return Promise.reject(error)
+  }
+)
 
 // Dashboard
 export const getDashboard = (periodId: string) =>

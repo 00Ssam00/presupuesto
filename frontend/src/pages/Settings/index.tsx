@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Header from '../../components/layout/Header'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Modal from '../../components/ui/Modal'
 import FormField from '../../components/ui/FormField'
 import Badge from '../../components/ui/Badge'
+import Skeleton from '../../components/ui/Skeleton'
 import {
-  getCategories, createCategory, updateCategory, deleteCategory,
-  getCards, createCard, updateCard, deleteCard,
-  getPeriods, createPeriod, deletePeriod,
+  createCategory, updateCategory, deleteCategory,
+  createCard, updateCard, deleteCard,
+  createPeriod, deletePeriod,
 } from '../../lib/api'
+import { useReferenceData } from '../../lib/ReferenceDataContext'
 import { formatDate } from '../../lib/utils'
-import type { Category, Card as CardType, Period } from '../../types'
+import type { Category, Card as CardType } from '../../types'
 import styles from './Settings.module.css'
 
 export default function Settings() {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [cards, setCards] = useState<CardType[]>([])
-  const [periods, setPeriods] = useState<Period[]>([])
+  const { categories, cards, periods, loading, refresh } = useReferenceData()
 
   const [catModal, setCatModal] = useState(false)
   const [editingCat, setEditingCat] = useState<Category | null>(null)
@@ -30,18 +30,12 @@ export default function Settings() {
   const [periodModal, setPeriodModal] = useState(false)
   const [periodForm, setPeriodForm] = useState({ label: '', start_date: '', end_date: '', base_income: '' })
 
-  useEffect(() => {
-    getCategories().then(setCategories)
-    getCards().then(setCards)
-    getPeriods().then(setPeriods)
-  }, [])
-
   async function saveCat(e: React.FormEvent) {
     e.preventDefault()
     if (editingCat) { await updateCategory(editingCat.id, catForm) }
     else { await createCategory(catForm) }
     setCatModal(false)
-    getCategories().then(setCategories)
+    refresh()
   }
 
   async function saveCard(e: React.FormEvent) {
@@ -49,14 +43,14 @@ export default function Settings() {
     if (editingCard) { await updateCard(editingCard.id, cardForm) }
     else { await createCard(cardForm) }
     setCardModal(false)
-    getCards().then(setCards)
+    refresh()
   }
 
   async function savePeriod(e: React.FormEvent) {
     e.preventDefault()
     await createPeriod({ ...periodForm, base_income: parseFloat(periodForm.base_income) })
     setPeriodModal(false)
-    getPeriods().then(setPeriods)
+    refresh()
   }
 
   return (
@@ -74,7 +68,8 @@ export default function Settings() {
             </Button>
           </div>
           <div className={styles.list}>
-            {categories.map(c => (
+            {loading && <ListSkeleton />}
+            {!loading && categories.map(c => (
               <div key={c.id} className={styles.listItem}>
                 <span className={styles.dot} style={{ background: c.color }} />
                 <span className={styles.itemName}>{c.name}</span>
@@ -85,7 +80,7 @@ export default function Settings() {
                   <Button variant="ghost" size="sm" onClick={async () => {
                     if (!confirm('¿Desactivar?')) return
                     await deleteCategory(c.id)
-                    getCategories().then(setCategories)
+                    refresh()
                   }}>✕</Button>
                 </div>
               </div>
@@ -102,8 +97,9 @@ export default function Settings() {
             </Button>
           </div>
           <div className={styles.list}>
-            {cards.length === 0 && <p className={styles.empty}>Sin tarjetas registradas</p>}
-            {cards.map(c => (
+            {loading && <ListSkeleton />}
+            {!loading && cards.length === 0 && <p className={styles.empty}>Sin tarjetas registradas</p>}
+            {!loading && cards.map(c => (
               <div key={c.id} className={styles.listItem}>
                 <span className={styles.itemName}>{c.name}</span>
                 {c.last_four && <Badge variant="default">···{c.last_four}</Badge>}
@@ -115,7 +111,7 @@ export default function Settings() {
                   <Button variant="ghost" size="sm" onClick={async () => {
                     if (!confirm('¿Desactivar?')) return
                     await deleteCard(c.id)
-                    getCards().then(setCards)
+                    refresh()
                   }}>✕</Button>
                 </div>
               </div>
@@ -132,7 +128,8 @@ export default function Settings() {
             </Button>
           </div>
           <div className={styles.list}>
-            {periods.slice(0, 8).map(p => (
+            {loading && <ListSkeleton />}
+            {!loading && periods.slice(0, 8).map(p => (
               <div key={p.id} className={styles.listItem}>
                 <span className={styles.itemName}>{p.label}</span>
                 <span className={styles.muted}>{formatDate(p.start_date)} — {formatDate(p.end_date)}</span>
@@ -140,7 +137,7 @@ export default function Settings() {
                 <Button variant="ghost" size="sm" onClick={async () => {
                   if (!confirm('¿Eliminar quincena?')) return
                   await deletePeriod(p.id)
-                  getPeriods().then(setPeriods)
+                  refresh()
                 }}>✕</Button>
               </div>
             ))}
@@ -212,5 +209,17 @@ export default function Settings() {
         </form>
       </Modal>
     </div>
+  )
+}
+
+function ListSkeleton() {
+  return (
+    <>
+      {[0, 1, 2].map(i => (
+        <div key={i} className={styles.listItem}>
+          <Skeleton width={120} height={14} />
+        </div>
+      ))}
+    </>
   )
 }

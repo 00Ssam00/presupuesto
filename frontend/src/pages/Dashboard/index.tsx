@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
@@ -7,12 +7,11 @@ import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
 import Modal from '../../components/ui/Modal'
 import FormField from '../../components/ui/FormField'
-import {
-  getDashboard, getCurrentPeriod, getPeriods,
-  getCategories, getPaymentMethods, getCards, createTransaction
-} from '../../lib/api'
+import Skeleton from '../../components/ui/Skeleton'
+import { getDashboard, createTransaction } from '../../lib/api'
+import { useReferenceData } from '../../lib/ReferenceDataContext'
 import { formatCOP, formatShortDate, pct, todayISO } from '../../lib/utils'
-import type { DashboardData, Period, Category, PaymentMethod, Card } from '../../types'
+import type { DashboardData } from '../../types'
 import styles from './Dashboard.module.css'
 
 const EMPTY_TX = {
@@ -22,36 +21,32 @@ const EMPTY_TX = {
 }
 
 export default function Dashboard() {
+  const { categories, methods, cards, periods, currentPeriod, loading: refLoading, error: refError } = useReferenceData()
+
   const [data, setData]           = useState<DashboardData | null>(null)
-  const [periods, setPeriods]     = useState<Period[]>([])
   const [selectedId, setSelectedId] = useState('')
   const [loading, setLoading]     = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError]         = useState('')
+  const selectedIdTouched = useRef(false)
 
-  const [categories, setCategories]   = useState<Category[]>([])
-  const [methods, setMethods]         = useState<PaymentMethod[]>([])
-  const [cards, setCards]             = useState<Card[]>([])
   const [txModal, setTxModal]         = useState(false)
   const [txForm, setTxForm]           = useState({ ...EMPTY_TX })
   const [saving, setSaving]           = useState(false)
 
   useEffect(() => {
-    Promise.all([getCurrentPeriod(), getPeriods(), getCategories(), getPaymentMethods(), getCards()])
-      .then(([current, all, cats, meths, cds]) => {
-        setPeriods(all)
-        setCategories(cats)
-        setMethods(meths)
-        setCards(cds)
-        const id = current?.id || all[0]?.id || ''
-        setSelectedId(id)
-        if (!id) setLoading(false)
-      })
-      .catch(() => {
-        setError('No se pudo conectar al servidor.')
-        setLoading(false)
-      })
-  }, [])
+    if (refLoading) return
+    if (!selectedIdTouched.current) {
+      const id = currentPeriod?.id || periods[0]?.id || ''
+      setSelectedId(id)
+      if (!id) setLoading(false)
+    }
+  }, [refLoading, currentPeriod, periods])
+
+  function selectPeriod(id: string) {
+    selectedIdTouched.current = true
+    setSelectedId(id)
+  }
 
   useEffect(() => {
     if (!selectedId) return
@@ -102,8 +97,8 @@ export default function Dashboard() {
     (a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
   )
   const currentIdx = sortedPeriods.findIndex(p => p.id === selectedId)
-  const goPrev = () => { if (currentIdx > 0) setSelectedId(sortedPeriods[currentIdx - 1].id) }
-  const goNext = () => { if (currentIdx < sortedPeriods.length - 1) setSelectedId(sortedPeriods[currentIdx + 1].id) }
+  const goPrev = () => { if (currentIdx > 0) selectPeriod(sortedPeriods[currentIdx - 1].id) }
+  const goNext = () => { if (currentIdx < sortedPeriods.length - 1) selectPeriod(sortedPeriods[currentIdx + 1].id) }
 
   // `total` llega como string desde Postgres (NUMERIC) — Recharts necesita un
   // number en dataKey para calcular los ángulos del pie, si no, no dibuja nada.
@@ -119,10 +114,10 @@ export default function Dashboard() {
   const totalBudget   = (data?.expenses_by_category || []).reduce((s, c) => s + Number(c.budget), 0)
   const budgetRemain  = totalBudget - (data?.total_expenses || 0)
 
-  if (error) return (
-    <div className={styles.stateMsg} style={{ color: 'var(--color-warning)' }}>{error}</div>
+  if (error || refError) return (
+    <div className={styles.stateMsg} style={{ color: 'var(--color-warning)' }}>{error || refError}</div>
   )
-  if (loading) return <div className={styles.stateMsg}>Cargando...</div>
+  if (loading || refLoading) return <DashboardSkeleton />
   if (!data)   return <div className={styles.stateMsg}>Sin datos. Ejecuta el seed en la base de datos.</div>
 
   const { available, total_expenses, remaining } = data
@@ -142,7 +137,7 @@ export default function Dashboard() {
             <select
               className={styles.periodSelect}
               value={selectedId}
-              onChange={e => setSelectedId(e.target.value)}
+              onChange={e => selectPeriod(e.target.value)}
             >
               {sortedPeriods.map(p => (
                 <option key={p.id} value={p.id}>{p.label}</option>
@@ -359,6 +354,71 @@ export default function Dashboard() {
           </div>
         </form>
       </Modal>
+    </div>
+  )
+}
+
+function DashboardSkeleton() {
+  return (
+    <div>
+      <div className={styles.pageHeader}>
+        <div>
+          <h1 className={styles.pageTitle}>Dashboard</h1>
+          <p className={styles.pageSubtitle}>Saldo disponible, rollover, presupuesto y pagos próximos.</p>
+        </div>
+        <Skeleton width={180} height={38} radius="var(--radius-lg)" />
+      </div>
+
+      <div className={styles.heroCard}>
+        <Skeleton width={120} height={14} />
+        <Skeleton width={260} height={48} className={styles.skeletonMt} />
+        <Skeleton width={200} height={14} className={styles.skeletonMt} />
+        <div className={styles.heroBreakdown} style={{ marginTop: 'var(--space-5)' }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} className={styles.breakdownItem}>
+              <Skeleton width={70} height={11} />
+              <Skeleton width={90} height={20} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.kpiRow}>
+        {[0, 1, 2, 3].map(i => (
+          <div key={i} className={styles.kpiCard}>
+            <Skeleton width={100} height={11} />
+            <Skeleton width={80} height={22} className={styles.skeletonMt} />
+            <Skeleton width={60} height={11} className={styles.skeletonMt} />
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.mainGrid}>
+        <div className={styles.chartsCol}>
+          <div className={styles.sectionCard}>
+            <Skeleton width={160} height={16} className={styles.skeletonMb} />
+            <Skeleton width={180} height={180} radius="50%" className={styles.skeletonCenter} />
+          </div>
+          <div className={styles.sectionCard}>
+            <Skeleton width={180} height={16} className={styles.skeletonMb} />
+            <Skeleton width="100%" height={200} />
+          </div>
+        </div>
+        <div className={styles.upcomingCol}>
+          <div className={styles.sectionCard}>
+            <Skeleton width={140} height={16} className={styles.skeletonMb} />
+            {[0, 1, 2].map(i => (
+              <div key={i} className={styles.paymentItem}>
+                <div style={{ flex: 1 }}>
+                  <Skeleton width="70%" height={14} />
+                  <Skeleton width="50%" height={11} className={styles.skeletonMt} />
+                </div>
+                <Skeleton width={60} height={14} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

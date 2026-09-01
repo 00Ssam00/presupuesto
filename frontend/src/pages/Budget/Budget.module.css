@@ -17,6 +17,7 @@
 @media (max-width: 600px) { .summary { grid-template-columns: 1fr; } }
 
 .kicker { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-2); }
+.skeletonMt { margin-top: var(--space-2); }
 .bigNum { font-size: var(--text-xl); font-weight: 700; font-variant-numeric: tabular-nums; }
 .warning { color: var(--color-warning); }
 .success { color: var(--color-success); }
