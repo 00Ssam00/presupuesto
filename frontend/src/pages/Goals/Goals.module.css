@@ -1,0 +1,72 @@
+.toolbar { margin-bottom: var(--space-6); }
+
+.section { margin-bottom: var(--space-8); }
+
+.sectionTitle {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  margin-bottom: var(--space-4);
+  color: var(--color-text);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+.goalCard {}
+
+.goalTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-3);
+}
+
+.goalName { font-weight: 700; font-size: var(--text-base); }
+.deadline { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 2px; }
+
+.goalActions { display: flex; gap: var(--space-1); }
+
+.goalAmounts {
+  font-size: var(--text-base);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--space-3);
+}
+
+.current { font-weight: 700; font-size: var(--text-lg); }
+.muted   { color: var(--color-text-muted); }
+
+.progressBar {
+  height: 8px;
+  background: var(--color-surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.goalBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--text-xs);
+}
+
+.empty { color: var(--color-text-muted); font-size: var(--text-sm); }
+
+.form { display: flex; flex-direction: column; gap: var(--space-4); }
+.row  { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}

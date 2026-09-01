@@ -1,0 +1,22 @@
+{
+  "name": "presupuesto",
+  "version": "1.0.0",
+  "description": "Presupuesto personal por quincenas — tests end-to-end (Playwright)",
+  "private": true,
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:backend": "npm run test --prefix backend",
+    "test:frontend": "npm run test --prefix frontend",
+    "test:all": "npm run test:backend && npm run test:frontend && npm run test:e2e"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "pg": "^8.23.0"
+  }
+}

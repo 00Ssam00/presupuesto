@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resumen PCX y Presupuesto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+      --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem; --space-5: 1.25rem;
+      --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
+      --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-border:#d4d1ca;
+      --color-text:#28251d; --color-text-muted:#7a7974; --color-primary:#01696f; --color-primary-hover:#0c4e54;
+      --color-success:#437a22; --color-warning:#964219; --radius-md:.5rem; --radius-lg:.75rem; --radius-xl:1rem;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.06); --shadow-md:0 4px 12px rgba(0,0,0,.08);
+      --font-body:'Instrument Sans', system-ui, sans-serif;
+    }
+    [data-theme="dark"] {
+      --color-bg:#171614; --color-surface:#1c1b19; --color-surface-2:#201f1d; --color-border:#393836;
+      --color-text:#cdccca; --color-text-muted:#797876; --color-primary:#4f98a3; --color-primary-hover:#227f8b;
+      --color-success:#6daa45; --color-warning:#bb653b; --shadow-sm:0 1px 2px rgba(0,0,0,.2); --shadow-md:0 4px 12px rgba(0,0,0,.3);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+    body{font-family:var(--font-body);font-size:var(--text-base);line-height:1.6;background:var(--color-bg);color:var(--color-text)}
+    .container{max-width:1100px;margin:0 auto;padding:var(--space-6) var(--space-4) var(--space-16)}
+    .header{display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);margin-bottom:var(--space-8);flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:var(--space-3)}
+    .logo{width:42px;height:42px;color:var(--color-primary)}
+    h1{font-size:var(--text-2xl);line-height:1.05}
+    .subtitle{color:var(--color-text-muted);max-width:70ch;margin-top:var(--space-2)}
+    .theme-toggle{min-width:44px;min-height:44px;border:1px solid var(--color-border);border-radius:999px;padding:var(--space-2);background:var(--color-surface);color:var(--color-text);box-shadow:var(--shadow-sm)}
+    .grid{display:grid;gap:var(--space-6)}
+    .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--space-4);margin-bottom:var(--space-8)}
+    .card{background:var(--color-surface);border:1px solid color-mix(in oklab, var(--color-text) 12%, transparent);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+    .card h2{font-size:var(--text-lg);margin-bottom:var(--space-2)}
+    .kicker{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-2)}
+    .big{font-size:var(--text-xl);font-weight:700;line-height:1.1}
+    .badge{display:inline-block;padding:.3rem .7rem;border-radius:999px;background:color-mix(in oklab, var(--color-primary) 12%, var(--color-surface));color:var(--color-primary);font-size:var(--text-xs);font-weight:700;letter-spacing:.02em}
+    section{display:grid;gap:var(--space-3)}
+    section + section{margin-top:var(--space-4)}
+    .section-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-4);flex-wrap:wrap;margin-bottom:var(--space-4)}
+    .section-head h2{font-size:var(--text-lg)}
+    .section-head p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:70ch}
+    table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:var(--radius-lg);font-size:var(--text-sm)}
+    th,td{padding:.85rem .9rem;border-bottom:1px solid var(--color-border);text-align:left;vertical-align:top}
+    th{background:var(--color-surface-2);font-weight:700}
+    tr:last-child td{border-bottom:none}
+    .num{text-align:right;font-variant-numeric:tabular-nums}
+    .success{color:var(--color-success);font-weight:700}
+    .warning{color:var(--color-warning);font-weight:700}
+    .note{font-size:var(--text-sm);color:var(--color-text-muted)}
+    .footer-note{margin-top:var(--space-6);padding:var(--space-4);background:var(--color-surface-2);border:1px dashed var(--color-border);border-radius:var(--radius-lg)}
+    @media (max-width:700px){
+      .container{padding:var(--space-4) var(--space-3) var(--space-12)}
+      th,td{padding:.7rem .6rem}
+      .section-card{padding:var(--space-4)}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div>
+        <div class="brand">
+          <svg class="logo" viewBox="0 0 64 64" fill="none" aria-label="Logo presupuesto movilidad">
+            <rect x="8" y="10" width="48" height="44" rx="12" stroke="currentColor" stroke-width="4"></rect>
+            <path d="M20 40h24M20 31h15M20 22h24" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path>
+          </svg>
+          <div>
+            <span class="badge">Presupuesto PCX</span>
+            <h1>Resumen mensual y financiero</h1>
+          </div>
+        </div>
+        <p class="subtitle">Documento con tus ingresos por quincena, gastos actuales, financiamiento de la Honda PCX, costos iniciales, nueva distribución porcentual y escenario posterior al crédito con gasolina extra para Medellín.</p>
+      </div>
+      <button class="theme-toggle" data-theme-toggle aria-label="Cambiar tema">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </header>
+
+    <div class="summary">
+      <article class="card">
+        <div class="kicker">Ingreso mensual total</div>
+        <div class="big">$2.044.000</div>
+      </article>
+      <article class="card">
+        <div class="kicker">Ingreso por quincena</div>
+        <div class="big">$1.022.000</div>
+      </article>
+      <article class="card">
+        <div class="kicker">Total mensual con PCX 24m</div>
+        <div class="big">$1.721.127</div>
+      </article>
+      <article class="card">
+        <div class="kicker">Disponible mensual estimado</div>
+        <div class="big success">$322.873</div>
+      </article>
+    </div>
+
+    <section class="section-card">
+      <div class="section-head">
+        <div>
+          <h2>1. Ingresos mensuales divididos por quincena</h2>
+          <p>Tomando el ingreso mensual total y separándolo en dos pagos quincenales iguales.</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th class="num">Monto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ingreso mensual total</td>
+            <td class="num">$2.044.000</td>
+          </tr>
+          <tr>
+            <td>Primera quincena</td>
+            <td class="num">$1.022.000</td>
+          </tr>
+          <tr>
+            <td>Segunda quincena</td>
+            <td class="num">$1.022.000</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section-card">
+      <div class="section-head">
+        <div>
+          <h2>2. Tabla de gastos actuales</h2>
+          <p>Distribución original de tus ingresos mensuales antes de adaptar el presupuesto a la PCX.</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th class="num">Monto</th>
+            <th class="num">Porcentaje</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Nu — ahorro</td><td class="num">$204.400</td><td class="num">10%</td></tr>
+          <tr><td>Acc. Moderado — inversión</td><td class="num">$511.000</td><td class="num">25%</td></tr>
+          <tr><td>Acc. Riesgo — inversión</td><td class="num">$204.400</td><td class="num">10%</td></tr>
+          <tr><td>Diciembre — regalos</td><td class="num">$102.200</td><td class="num">5%</td></tr>
+          <tr><td>iPhone — gasto fijo 12 meses</td><td class="num">$327.040</td><td class="num">16%</td></tr>
+          <tr><td>Samuel — gasto actual (mitad transporte / mitad necesario)</td><td class="num">$694.960</td><td class="num">34%</td></tr>
+          <tr><th>Total</th><th class="num">$2.044.000</th><th class="num">100%</th></tr>
+        </tbody>
+      </table>
+      <p class="note">Dentro de “Samuel”, se asume aproximadamente $347.480 en transporte actual y $347.480 en necesidades base.</p>
+    </section>
+
+    <section class="section-card">
+      <div class="section-head">
+        <div>
+          <h2>3. Tabla de financiamiento PCX</h2>
+          <p>Escenario que compartiste: cuota inicial de $2.000.000, monto financiado $12.800.000, tasa mensual 1.99% y plazo 24 meses.</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Dato</th>
+            <th class="num">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Precio aproximado Honda PCX</td><td class="num">$14.800.000</td></tr>
+          <tr><td>Cuota inicial</td><td class="num">$2.000.000</td></tr>
+          <tr><td>Monto prestado</td><td class="num">$12.800.000</td></tr>
+          <tr><td>Plazo</td><td class="num">24 meses</td></tr>
+          <tr><td>Tasa mensual</td><td class="num">1,99%</td></tr>
+          <tr><td>Cuota mensual</td><td class="num">$684.407</td></tr>
+          <tr><td>Total pagado en cuotas</td><td class="num">$16.425.768</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section-card">
+      <div class="section-head">
+        <div>
+          <h2>4. Tabla de costos iniciales PCX</h2>
+          <p>Pagos únicos antes de empezar a usar la moto. Estos no deben repetirse mensualmente.</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th class="num">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>SOAT 2026</td><td class="num">$343.300</td></tr>
+          <tr><td>Matrícula</td><td class="num">$157.700</td></tr>
+          <tr><td>Tecnomecánica</td><td class="num">$246.890</td></tr>
+          <tr><th>Total costos iniciales</th><th class="num">$747.890</th></tr>
+          <tr><td>Saldo restante del inicial de $2.000.000</td><td class="num success">$1.252.110</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section-card">
+      <div class="section-head">
+        <div>
+          <h2>5. Tabla de gastos futuros</h2>
+          <p>Nueva distribución mensual para cumplir con el iPhone, diciembre, necesidades base y la PCX durante el financiamiento.</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th class="num">Monto mensual</th>
+            <th class="num">Nuevo porcentaje</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>iPhone</td><td class="num">$327.040</td><td class="num">16,0%</td></tr>
+          <tr><td>Diciembre</td><td class="num">$102.200</td><td class="num">5,0%</td></tr>
+          <tr><td>Necesidades base</td><td class="num">$347.480</td><td class="num">17,0%</td></tr>
+          <tr><td>PCX — cuota</td><td class="num">$684.407</td><td class="num">33,5%</td></tr>
+          <tr><td>PCX — operación mensual</td><td class="num">$260.000</td><td class="num">12,7%</td></tr>
+          <tr><th>Total mensual comprometido</th><th class="num">$1.721.127</th><th class="num">84,2%</th></tr>
+          <tr><td>Disponible libre / buffer</td><td class="num success">$322.873</td><td class="num">15,8%</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Para llegar a este escenario, las inversiones y el ahorro actual deben recortarse temporalmente durante el periodo del financiamiento.</p>
+    </section>
+
+    <section class="section-card">
+      <div class="section-head">
+        <div>
+          <h2>6. Gastos luego del financiamiento</h2>
+          <p>Escenario una vez terminen las 24 cuotas. Aquí ya no existe la cuota del préstamo, pero sí se mantiene la operación de la moto con gasolina extra para Medellín.</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th class="num">Monto mensual</th>
+            <th class="num">Porcentaje</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>iPhone (mientras siga vigente)</td><td class="num">$327.040</td><td class="num">16,0%</td></tr>
+          <tr><td>Diciembre</td><td class="num">$102.200</td><td class="num">5,0%</td></tr>
+          <tr><td>Necesidades base</td><td class="num">$347.480</td><td class="num">17,0%</td></tr>
+          <tr><td>Gasolina PCX en Medellín</td><td class="num">$180.000</td><td class="num">8,8%</td></tr>
+          <tr><td>Mantenimiento y otros PCX</td><td class="num">$80.000</td><td class="num">3,9%</td></tr>
+          <tr><th>Total mensual post-financiación</th><th class="num">$1.036.720</th><th class="num">50,7%</th></tr>
+          <tr><td>Disponible mensual aproximado</td><td class="num success">$1.007.280</td><td class="num">49,3%</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Aquí se subió la gasolina a $180.000 para contemplar un consumo más realista y algo de holgura en Medellín.</p>
+    </section>
+
+    <div class="footer-note">
+      <strong>Lectura rápida:</strong> durante el financiamiento la PCX consume la mayor parte de tu margen mensual, pero sí deja un colchón. Después de terminar las cuotas, el presupuesto se libera mucho y vuelve a ser bastante cómodo.
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const btn = document.querySelector('[data-theme-toggle]');
+      const root = document.documentElement;
+      let theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.setAttribute('data-theme', theme);
+      btn.addEventListener('click', () => {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', theme);
+        btn.innerHTML = theme === 'dark'
+          ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+          : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+      });
+    })();
+  </script>
+</body>
+</html>
+
