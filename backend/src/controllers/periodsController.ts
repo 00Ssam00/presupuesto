@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import pool from '../db'
+import { recalculateAllRollovers } from '../services/rollover'
 
 export async function listPeriods(_req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -42,7 +43,9 @@ export async function createPeriod(req: Request, res: Response, next: NextFuncti
        VALUES ($1,$2,$3,$4,$5) RETURNING *`,
       [label, start_date, end_date, base_income || 0, rollover || 0]
     )
-    res.status(201).json(result.rows[0])
+    await recalculateAllRollovers()
+    const fresh = await pool.query('SELECT * FROM periods WHERE id = $1', [result.rows[0].id])
+    res.status(201).json(fresh.rows[0])
   } catch (err) { next(err) }
 }
 
@@ -56,13 +59,16 @@ export async function updatePeriod(req: Request, res: Response, next: NextFuncti
       [label, start_date, end_date, base_income, rollover, is_closed, req.params.id]
     )
     if (result.rows.length === 0) { res.status(404).json({ error: 'No encontrado' }); return }
-    res.json(result.rows[0])
+    await recalculateAllRollovers()
+    const fresh = await pool.query('SELECT * FROM periods WHERE id = $1', [req.params.id])
+    res.json(fresh.rows[0])
   } catch (err) { next(err) }
 }
 
 export async function deletePeriod(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     await pool.query('DELETE FROM periods WHERE id = $1', [req.params.id])
+    await recalculateAllRollovers()
     res.status(204).send()
   } catch (err) { next(err) }
 }

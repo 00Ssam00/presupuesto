@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { createTestPeriod, deletePeriod, type TestPeriod } from './helpers/api'
+import { createTestPeriod, deletePeriod, getPeriod, type TestPeriod } from './helpers/api'
 
 let period: TestPeriod
 
@@ -15,11 +15,17 @@ test.afterAll(async () => {
 })
 
 test.describe('Dashboard', () => {
-  test('el saldo disponible refleja el ingreso base de la quincena seleccionada', async ({ page }) => {
+  test('el saldo disponible refleja el ingreso base más el rollover automático de la quincena seleccionada', async ({ page }) => {
+    // El rollover se recalcula automáticamente a partir del sobrante/déficit de la
+    // quincena anterior, así que el saldo disponible no es solo el ingreso base.
+    const current = await getPeriod(period.id)
+    const expectedAvailable = Number(current.base_income) + Number(current.rollover)
+    const formatted = Math.round(expectedAvailable).toLocaleString('es-CO')
+
     await page.goto('/dashboard')
     await page.locator('select').first().selectOption({ label: period.label })
 
-    await expect(page.locator('[class*="heroAmount"]')).toHaveText(/500\.000/)
+    await expect(page.locator('[class*="heroAmount"]')).toContainText(formatted)
     await expect(page.locator('[class*="kpiValue"]').first()).toHaveText(/\$\s?0/)
   })
 

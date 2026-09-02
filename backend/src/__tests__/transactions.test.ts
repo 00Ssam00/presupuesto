@@ -61,7 +61,9 @@ describe('GET /api/transactions/:id', () => {
 
 describe('POST /api/transactions', () => {
   it('crea una transacción y usa null para card_id ausente', async () => {
-    query.mockResolvedValueOnce({ rows: [{ id: 'new-id' }] })
+    query
+      .mockResolvedValueOnce({ rows: [{ id: 'new-id' }] }) // INSERT
+      .mockResolvedValueOnce({ rows: [] }) // SELECT de recalculateAllRollovers
 
     const res = await request(app).post('/api/transactions').send({
       period_id: 'p1',
@@ -91,10 +93,41 @@ describe('POST /api/transactions', () => {
   })
 })
 
-describe('DELETE /api/transactions/:id', () => {
-  it('responde 204', async () => {
+describe('PUT /api/transactions/:id', () => {
+  it('actualiza la transacción y recalcula los rollovers', async () => {
+    query
+      .mockResolvedValueOnce({ rows: [{ id: 't1' }] }) // UPDATE
+      .mockResolvedValueOnce({ rows: [] }) // SELECT de recalculateAllRollovers
+
+    const res = await request(app).put('/api/transactions/t1').send({
+      category_id: 'c1', payment_method_id: 'pm1', type: 'expense',
+      amount: 3000, description: 'Ajuste', date: '2026-06-21',
+    })
+
+    expect(res.status).toBe(200)
+    expect(query).toHaveBeenCalledTimes(2)
+  })
+
+  it('devuelve 404 sin recalcular si no existe', async () => {
     query.mockResolvedValueOnce({ rows: [] })
+
+    const res = await request(app).put('/api/transactions/no-existe').send({
+      category_id: 'c1', payment_method_id: 'pm1', type: 'expense',
+      amount: 3000, description: 'x', date: '2026-06-21',
+    })
+
+    expect(res.status).toBe(404)
+    expect(query).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('DELETE /api/transactions/:id', () => {
+  it('responde 204 y recalcula los rollovers', async () => {
+    query
+      .mockResolvedValueOnce({ rows: [] }) // DELETE
+      .mockResolvedValueOnce({ rows: [] }) // SELECT de recalculateAllRollovers
     const res = await request(app).delete('/api/transactions/t1')
     expect(res.status).toBe(204)
+    expect(query).toHaveBeenCalledTimes(2)
   })
 })

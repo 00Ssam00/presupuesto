@@ -36,6 +36,11 @@ export async function deletePeriod(id: string): Promise<void> {
   await fetch(`${API_BASE}/periods/${id}`, { method: 'DELETE' })
 }
 
+export async function getPeriod(id: string): Promise<TestPeriod & { rollover: number }> {
+  const res = await fetch(`${API_BASE}/periods/${id}`)
+  return json<TestPeriod & { rollover: number }>(res)
+}
+
 export async function deleteTransaction(id: string): Promise<void> {
   await fetch(`${API_BASE}/transactions/${id}`, { method: 'DELETE' })
 }
