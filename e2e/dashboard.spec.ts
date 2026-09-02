@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { createTestPeriod, deletePeriod, getPeriod, type TestPeriod } from './helpers/api'
+import { createTestPeriod, deletePeriod, getPeriod, getCurrentPeriod, type TestPeriod } from './helpers/api'
 
 let period: TestPeriod
 
@@ -27,6 +27,30 @@ test.describe('Dashboard', () => {
 
     await expect(page.locator('[class*="heroAmount"]')).toContainText(formatted)
     await expect(page.locator('[class*="kpiValue"]').first()).toHaveText(/\$\s?0/)
+  })
+
+  test('la fecha del gasto rápido respeta la quincena seleccionada, no la fecha real de hoy', async ({ page }) => {
+    // `period` (helper createTestPeriod) usa por defecto 2031-01-01..2031-01-15,
+    // un rango que no incluye la fecha real de hoy. El campo "Fecha" del modal
+    // debía quedar fijo en la fecha de hoy sin importar la quincena elegida
+    // (bug reportado); ahora debe ajustarse al rango de la quincena.
+    await page.goto('/dashboard')
+    await page.locator('select').first().selectOption({ label: period.label })
+
+    await page.getByRole('button', { name: '+ Agregar gasto' }).click()
+    const dateInput = page.getByLabel('Fecha')
+    await expect(dateInput).toHaveValue(period.start_date.slice(0, 10))
+  })
+
+  test('la fecha del gasto rápido usa la fecha real de hoy cuando cae dentro de la quincena actual', async ({ page }) => {
+    const current = await getCurrentPeriod()
+
+    await page.goto('/dashboard')
+    await page.locator('select').first().selectOption({ label: current.label })
+
+    await page.getByRole('button', { name: '+ Agregar gasto' }).click()
+    const today = new Date().toISOString().slice(0, 10)
+    await expect(page.getByLabel('Fecha')).toHaveValue(today)
   })
 
   test('agregar un gasto rápido actualiza los gastos totales', async ({ page }) => {

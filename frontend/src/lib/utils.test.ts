@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { formatCOP, formatDate, formatShortDate, todayISO, pct, clamp } from './utils'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { formatCOP, formatDate, formatShortDate, todayISO, pct, clamp, clampDateToPeriod } from './utils'
 
 describe('formatCOP', () => {
   it('formatea como pesos colombianos sin decimales', () => {
@@ -69,6 +69,44 @@ describe('pct', () => {
 
   it('puede superar 100 cuando el valor excede el total', () => {
     expect(pct(150, 100)).toBe(150)
+  })
+})
+
+describe('clampDateToPeriod', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('devuelve hoy si cae dentro del rango de la quincena', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-20T12:00:00.000Z'))
+    const period = { start_date: '2026-06-16', end_date: '2026-06-30' }
+    expect(clampDateToPeriod(period)).toBe('2026-06-20')
+  })
+
+  it('ajusta al inicio de la quincena si hoy es anterior a su rango', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-01T12:00:00.000Z'))
+    const period = { start_date: '2026-06-16', end_date: '2026-06-30' }
+    expect(clampDateToPeriod(period)).toBe('2026-06-16')
+  })
+
+  it('ajusta al final de la quincena si hoy es posterior a su rango', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-07-15T12:00:00.000Z'))
+    const period = { start_date: '2026-06-16', end_date: '2026-06-30' }
+    expect(clampDateToPeriod(period)).toBe('2026-06-30')
+  })
+
+  it('devuelve hoy si no hay quincena seleccionada', () => {
+    expect(clampDateToPeriod(null)).toBe(todayISO())
+  })
+
+  it('tolera timestamps ISO completos en start_date/end_date', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-01T12:00:00.000Z'))
+    const period = { start_date: '2026-06-16T00:00:00.000Z', end_date: '2026-06-30T00:00:00.000Z' }
+    expect(clampDateToPeriod(period)).toBe('2026-06-16')
   })
 })
 

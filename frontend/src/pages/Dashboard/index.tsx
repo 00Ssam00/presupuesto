@@ -10,7 +10,7 @@ import FormField from '../../components/ui/FormField'
 import Skeleton from '../../components/ui/Skeleton'
 import { getDashboard, createTransaction } from '../../lib/api'
 import { useReferenceData } from '../../lib/ReferenceDataContext'
-import { formatCOP, formatShortDate, pct, todayISO } from '../../lib/utils'
+import { formatCOP, formatShortDate, pct, todayISO, clampDateToPeriod } from '../../lib/utils'
 import type { DashboardData } from '../../types'
 import styles from './Dashboard.module.css'
 
@@ -63,7 +63,7 @@ export default function Dashboard() {
   }, [selectedId])
 
   function openTxModal() {
-    setTxForm({ ...EMPTY_TX, period_id: selectedId })
+    setTxForm({ ...EMPTY_TX, period_id: selectedId, date: clampDateToPeriod(period) })
     setTxModal(true)
   }
 

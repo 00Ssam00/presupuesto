@@ -41,6 +41,11 @@ export async function getPeriod(id: string): Promise<TestPeriod & { rollover: nu
   return json<TestPeriod & { rollover: number }>(res)
 }
 
+export async function getCurrentPeriod(): Promise<TestPeriod & { rollover: number }> {
+  const res = await fetch(`${API_BASE}/periods/current`)
+  return json<TestPeriod & { rollover: number }>(res)
+}
+
 export async function deleteTransaction(id: string): Promise<void> {
   await fetch(`${API_BASE}/transactions/${id}`, { method: 'DELETE' })
 }
