@@ -51,7 +51,7 @@ export interface Transaction {
 }
 
 export interface Budget {
-  id: string
+  id: string | null
   period_id: string
   category_id: string
   amount: number

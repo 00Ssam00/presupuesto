@@ -4,16 +4,17 @@ import pool from '../db'
 export async function getBudgetsByPeriod(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const result = await pool.query(
-      `SELECT b.*, c.name AS category_name, c.color AS category_color,
+      `SELECT b.id, $1::uuid AS period_id, c.id AS category_id,
+        COALESCE(b.amount, 0) AS amount, b.percentage,
+        c.name AS category_name, c.color AS category_color,
         COALESCE(
           (SELECT SUM(amount) FROM transactions t
-           WHERE t.category_id = b.category_id
-             AND t.period_id   = b.period_id
+           WHERE t.category_id = c.id
+             AND t.period_id   = $1
              AND t.type        = 'expense'), 0
         ) AS spent
-       FROM budgets b
-       JOIN categories c ON c.id = b.category_id
-       WHERE b.period_id = $1
+       FROM categories c
+       LEFT JOIN budgets b ON b.period_id = $1 AND b.category_id = c.id
        ORDER BY c.sort_order`,
       [req.params.periodId]
     )

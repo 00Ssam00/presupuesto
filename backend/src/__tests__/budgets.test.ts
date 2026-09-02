@@ -40,4 +40,22 @@ describe('GET /api/budgets/period/:periodId', () => {
     expect(res.status).toBe(200)
     expect(res.body).toEqual([{ id: 'b1', category_id: 'c1', amount: '50000', spent: '20000' }])
   })
+
+  it('incluye categorías sin presupuesto asignado (LEFT JOIN) con amount en 0', async () => {
+    query.mockResolvedValueOnce({
+      rows: [
+        { id: 'b1', category_id: 'c1', amount: '50000', spent: '20000' },
+        { id: null, category_id: 'c2', amount: '0', spent: '0' },
+      ],
+    })
+
+    const res = await request(app).get('/api/budgets/period/p1')
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveLength(2)
+    expect(res.body[1]).toEqual({ id: null, category_id: 'c2', amount: '0', spent: '0' })
+    const [sql] = query.mock.calls[0]
+    expect(sql).toContain('FROM categories c')
+    expect(sql).toContain('LEFT JOIN budgets b')
+  })
 })
