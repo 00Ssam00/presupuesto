@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { errorHandler } from '../middleware/errorHandler'
 
 function mockRes() {
@@ -34,5 +34,36 @@ describe('errorHandler', () => {
     errorHandler(err, {} as never, res as never, vi.fn())
 
     expect(res.body).toEqual({ error: 'Error interno del servidor' })
+  })
+
+  describe('en producción', () => {
+    const originalEnv = process.env.NODE_ENV
+
+    afterEach(() => {
+      process.env.NODE_ENV = originalEnv
+    })
+
+    it('no expone el mensaje crudo del error (puede filtrar detalles de Postgres)', () => {
+      process.env.NODE_ENV = 'production'
+      const res = mockRes()
+      const err = new Error('relation "budgets" violates foreign key constraint "budgets_category_id_fkey"')
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      errorHandler(err, {} as never, res as never, vi.fn())
+
+      expect(res.statusCode).toBe(500)
+      expect(res.body).toEqual({ error: 'Error interno del servidor' })
+    })
+
+    it('igual registra el detalle completo en los logs del servidor', () => {
+      process.env.NODE_ENV = 'production'
+      const res = mockRes()
+      const err = new Error('detalle sensible')
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      errorHandler(err, {} as never, res as never, vi.fn())
+
+      expect(consoleSpy).toHaveBeenCalledWith(err.stack)
+    })
   })
 })
