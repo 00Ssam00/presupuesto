@@ -57,6 +57,29 @@ export const createTransaction = (d: Partial<Transaction>) => api.post<Transacti
 export const updateTransaction = (id: string, d: Partial<Transaction>) => api.put<Transaction>(`/transactions/${id}`, d).then(r => r.data)
 export const deleteTransaction = (id: string) => api.delete(`/transactions/${id}`)
 
+export interface ImportRow {
+  monto?: string
+  tipo?: string
+  fecha?: string
+  categoria?: string
+  metodo?: string
+  tarjeta?: string
+  descripcion?: string
+}
+export interface ImportRowResult {
+  row: number
+  status: 'created' | 'error'
+  id?: string
+  error?: string
+}
+export interface ImportResponse {
+  created: number
+  failed: number
+  results: ImportRowResult[]
+}
+export const importTransactions = (period_id: string, rows: ImportRow[]) =>
+  api.post<ImportResponse>('/transactions/import', { period_id, rows }).then(r => r.data)
+
 // Categories
 export const getCategories    = () => api.get<Category[]>('/categories').then(r => r.data)
 export const createCategory   = (d: Partial<Category>) => api.post<Category>('/categories', d).then(r => r.data)

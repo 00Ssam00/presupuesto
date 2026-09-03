@@ -47,3 +47,41 @@ export function pct(value: number, total: number): number {
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
+
+// Parser de una línea CSV (RFC 4180): respeta campos entre comillas que
+// contienen comas o comillas escapadas (""), a diferencia de un `.split(',')`
+// ingenuo que rompe en descripciones como `"Mercado, verduras y carne"`.
+export function parseCsvLine(line: string): string[] {
+  const result: string[] = []
+  let cur = ''
+  let inQuotes = false
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++ }
+        else { inQuotes = false }
+      } else {
+        cur += ch
+      }
+    } else if (ch === '"') {
+      inQuotes = true
+    } else if (ch === ',') {
+      result.push(cur)
+      cur = ''
+    } else {
+      cur += ch
+    }
+  }
+  result.push(cur)
+  return result.map(v => v.trim())
+}
+
+// Envuelve en comillas (y escapa las comillas internas) solo los campos que
+// lo necesitan, para producir un CSV válido al exportar.
+export function csvEscapeField(value: string): string {
+  if (/[",\n]/.test(value)) {
+    return `"${value.replace(/"/g, '""')}"`
+  }
+  return value
+}

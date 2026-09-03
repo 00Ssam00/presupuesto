@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { formatCOP, formatDate, formatShortDate, todayISO, pct, clamp, clampDateToPeriod } from './utils'
+import { formatCOP, formatDate, formatShortDate, todayISO, pct, clamp, clampDateToPeriod, parseCsvLine, csvEscapeField } from './utils'
 
 describe('formatCOP', () => {
   it('formatea como pesos colombianos sin decimales', () => {
@@ -107,6 +107,44 @@ describe('clampDateToPeriod', () => {
     vi.setSystemTime(new Date('2026-06-01T12:00:00.000Z'))
     const period = { start_date: '2026-06-16T00:00:00.000Z', end_date: '2026-06-30T00:00:00.000Z' }
     expect(clampDateToPeriod(period)).toBe('2026-06-16')
+  })
+})
+
+describe('parseCsvLine', () => {
+  it('divide una línea simple por comas', () => {
+    expect(parseCsvLine('85000,expense,2026-04-03')).toEqual(['85000', 'expense', '2026-04-03'])
+  })
+
+  it('respeta comas dentro de un campo entre comillas (regresión: split(",") ingenuo lo rompía)', () => {
+    expect(parseCsvLine('85000,expense,"Mercado, verduras y carne"')).toEqual(['85000', 'expense', 'Mercado, verduras y carne'])
+  })
+
+  it('des-escapa comillas dobles dentro de un campo entre comillas', () => {
+    expect(parseCsvLine('1,"dijo ""hola"" al llegar"')).toEqual(['1', 'dijo "hola" al llegar'])
+  })
+
+  it('recorta espacios alrededor de cada valor', () => {
+    expect(parseCsvLine(' 85000 , expense ')).toEqual(['85000', 'expense'])
+  })
+})
+
+describe('csvEscapeField', () => {
+  it('deja igual un valor sin caracteres especiales', () => {
+    expect(csvEscapeField('Mercado')).toBe('Mercado')
+  })
+
+  it('envuelve en comillas un valor con coma', () => {
+    expect(csvEscapeField('Mercado, verduras')).toBe('"Mercado, verduras"')
+  })
+
+  it('escapa comillas internas duplicándolas', () => {
+    expect(csvEscapeField('dijo "hola"')).toBe('"dijo ""hola"""')
+  })
+
+  it('produce un valor que parseCsvLine puede leer de vuelta sin pérdida', () => {
+    const original = 'Mercado, "verduras" y carne'
+    const line = [csvEscapeField(original), csvEscapeField('expense')].join(',')
+    expect(parseCsvLine(line)).toEqual([original, 'expense'])
   })
 })
 
