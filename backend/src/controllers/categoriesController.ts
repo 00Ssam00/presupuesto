@@ -24,8 +24,13 @@ export async function createCategory(req: Request, res: Response, next: NextFunc
 export async function updateCategory(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { name, color, icon, is_active, sort_order } = req.body
+    // El formulario de edición solo envía name/color — icon, is_active y
+    // sort_order no vienen en el body. Sin COALESCE, esos `undefined` se
+    // volvían NULL en la fila (is_active=NULL hacía que la categoría
+    // desapareciera de todos los listados, que filtran is_active = TRUE).
     const result = await pool.query(
-      `UPDATE categories SET name=$1, color=$2, icon=$3, is_active=$4, sort_order=$5
+      `UPDATE categories SET name=$1, color=$2,
+         icon=COALESCE($3, icon), is_active=COALESCE($4, is_active), sort_order=COALESCE($5, sort_order)
        WHERE id=$6 RETURNING *`,
       [name, color, icon, is_active, sort_order, req.params.id]
     )

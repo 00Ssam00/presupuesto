@@ -25,9 +25,12 @@ export async function createGoal(req: Request, res: Response, next: NextFunction
 export async function updateGoal(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { name, type, target_amount, current_amount, deadline, is_active } = req.body
+    // El formulario de edición no envía is_active — sin COALESCE, ese
+    // `undefined` se volvía NULL y la meta desaparecía de los listados
+    // (que filtran is_active = TRUE).
     const result = await pool.query(
       `UPDATE goals SET name=$1, type=$2, target_amount=$3,
-       current_amount=$4, deadline=$5, is_active=$6, updated_at=NOW()
+       current_amount=$4, deadline=$5, is_active=COALESCE($6, is_active), updated_at=NOW()
        WHERE id=$7 RETURNING *`,
       [name, type, target_amount, current_amount, deadline || null, is_active, req.params.id]
     )

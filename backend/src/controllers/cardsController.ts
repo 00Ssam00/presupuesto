@@ -24,8 +24,11 @@ export async function createCard(req: Request, res: Response, next: NextFunction
 export async function updateCard(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { name, last_four, bank, is_active } = req.body
+    // El formulario de edición no envía is_active — sin COALESCE, ese
+    // `undefined` se volvía NULL y la tarjeta desaparecía de los listados
+    // (que filtran is_active = TRUE).
     const result = await pool.query(
-      'UPDATE cards SET name=$1, last_four=$2, bank=$3, is_active=$4 WHERE id=$5 RETURNING *',
+      'UPDATE cards SET name=$1, last_four=$2, bank=$3, is_active=COALESCE($4, is_active) WHERE id=$5 RETURNING *',
       [name, last_four || null, bank || null, is_active, req.params.id]
     )
     if (result.rows.length === 0) { res.status(404).json({ error: 'No encontrada' }); return }
