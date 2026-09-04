@@ -1,33 +1,44 @@
 import { test, expect } from '@playwright/test'
 import { createTestPeriod, deletePeriod, getFirstCategory, getCashPaymentMethod, type TestPeriod } from './helpers/api'
 
-let period: TestPeriod
+let periodA: TestPeriod
+let periodB: TestPeriod
 let category: { id: string; name: string }
 let method: { id: string; name: string }
 
 test.beforeAll(async () => {
-  period = await createTestPeriod({
-    label: 'E2E Import Export',
+  periodA = await createTestPeriod({
+    label: 'E2E Import Export A',
     start_date: '2099-03-01',
     end_date: '2099-03-15',
+  })
+  periodB = await createTestPeriod({
+    label: 'E2E Import Export B',
+    start_date: '2099-03-16',
+    end_date: '2099-03-31',
   })
   category = await getFirstCategory()
   method = await getCashPaymentMethod()
 })
 
 test.afterAll(async () => {
-  await deletePeriod(period.id)
+  await deletePeriod(periodA.id)
+  await deletePeriod(periodB.id)
 })
 
 test.describe('Importar / Exportar', () => {
-  test('importa un CSV con filas válidas e inválidas (importación parcial) hacia la quincena elegida', async ({ page }) => {
+  test('importa un CSV que abarca dos quincenas en una sola pasada, resolviendo cada fila por su fecha', async ({ page }) => {
     const csv = [
       'monto,tipo,fecha,categoria,metodo,descripcion',
       `50000,expense,2099-03-05,${category.name},${method.name},"Compra E2E, con coma en la descripción"`,
+      `30000,expense,2099-03-20,${category.name},${method.name},Compra en la segunda quincena`,
       `20000,expense,2099-03-06,Categoría Inexistente E2E,${method.name},Fila inválida`,
     ].join('\n')
 
     await page.goto('/import')
+
+    // Ya no hay selector de quincena: la fecha de cada fila decide a cuál pertenece.
+    await expect(page.getByLabel('Quincena de destino')).toHaveCount(0)
 
     await page.locator('input[type="file"]').setInputFiles({
       name: 'transacciones.csv',
@@ -35,20 +46,42 @@ test.describe('Importar / Exportar', () => {
       buffer: Buffer.from(csv, 'utf-8'),
     })
 
-    await expect(page.getByText('2 filas detectadas')).toBeVisible()
+    await expect(page.getByText('3 filas detectadas')).toBeVisible()
+    await page.getByRole('button', { name: /Importar 3 filas/ }).click()
 
-    await page.getByLabel('Quincena de destino').selectOption({ label: period.label })
-    await page.getByRole('button', { name: /Importar 2 filas/ }).click()
+    await expect(page.getByText('2 transacciones importadas, 1 fila con errores.')).toBeVisible()
+    await expect(page.getByText(/Fila 3: Categoría no encontrada/)).toBeVisible()
 
-    await expect(page.getByText('1 transacción importada, 1 fila con errores.')).toBeVisible()
-    await expect(page.getByText(/Fila 2: Categoría no encontrada/)).toBeVisible()
+    // Cada transacción quedó en la quincena que le corresponde por fecha.
+    await page.goto('/transactions')
+    await page.locator('select').first().selectOption({ label: periodA.label })
+    await expect(page.getByText('Compra E2E, con coma en la descripción')).toBeVisible()
+    await page.locator('select').first().selectOption({ label: periodB.label })
+    await expect(page.getByText('Compra en la segunda quincena')).toBeVisible()
   })
 
-  test('exporta las transacciones de la quincena y el CSV se puede volver a leer', async ({ page }) => {
+  test('rechaza una fila cuya fecha no cae en ninguna quincena existente', async ({ page }) => {
+    const csv = [
+      'monto,tipo,fecha,categoria,metodo,descripcion',
+      `10000,expense,2199-01-01,${category.name},${method.name},Fecha sin quincena`,
+    ].join('\n')
+
+    await page.goto('/import')
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'sin-quincena.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from(csv, 'utf-8'),
+    })
+    await page.getByRole('button', { name: /Importar 1 fila/ }).click()
+
+    await expect(page.getByText(/Fila 1: No hay ninguna quincena que incluya la fecha/)).toBeVisible()
+  })
+
+  test('exporta las transacciones de una quincena y el CSV se puede volver a leer', async ({ page }) => {
     await page.goto('/import')
 
     const exportSelect = page.getByLabel('Quincena')
-    await exportSelect.selectOption({ label: period.label })
+    await exportSelect.selectOption({ label: periodA.label })
 
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -64,5 +97,7 @@ test.describe('Importar / Exportar', () => {
     // La fila con coma en la descripción debe volver escapada entre comillas.
     expect(content).toContain('"Compra E2E, con coma en la descripción"')
     expect(content).toContain(category.name)
+    // No debe incluir transacciones de la otra quincena.
+    expect(content).not.toContain('Compra en la segunda quincena')
   })
 })

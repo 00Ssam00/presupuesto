@@ -77,8 +77,8 @@ export interface ImportResponse {
   failed: number
   results: ImportRowResult[]
 }
-export const importTransactions = (period_id: string, rows: ImportRow[]) =>
-  api.post<ImportResponse>('/transactions/import', { period_id, rows }).then(r => r.data)
+export const importTransactions = (rows: ImportRow[]) =>
+  api.post<ImportResponse>('/transactions/import', { rows }).then(r => r.data)
 
 // Categories
 export const getCategories    = () => api.get<Category[]>('/categories').then(r => r.data)

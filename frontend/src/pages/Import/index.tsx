@@ -13,7 +13,7 @@ import styles from './Import.module.css'
 interface CsvRow {
   monto: string
   tipo: string
-  fecha?: string
+  fecha: string
   categoria?: string
   metodo?: string
   tarjeta?: string
@@ -21,11 +21,10 @@ interface CsvRow {
 }
 
 export default function ImportExport() {
-  const { periods, currentPeriod, loading: refLoading } = useReferenceData()
+  const { periods, loading: refLoading } = useReferenceData()
 
   const [rows, setRows] = useState<CsvRow[]>([])
   const [parseError, setParseError] = useState('')
-  const [targetPeriodId, setTargetPeriodId] = useState('')
   const [importing, setImporting] = useState(false)
   const [importResult, setImportResult] = useState<ImportResponse | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -38,7 +37,7 @@ export default function ImportExport() {
     if (lines.length < 2) throw new Error('El archivo está vacío o no tiene datos')
     const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase())
 
-    const requiredCols = ['monto', 'tipo']
+    const requiredCols = ['monto', 'tipo', 'fecha']
     for (const col of requiredCols) {
       if (!headers.includes(col)) throw new Error(`Columna requerida faltante: "${col}"`)
     }
@@ -60,9 +59,7 @@ export default function ImportExport() {
     const reader = new FileReader()
     reader.onload = ev => {
       try {
-        const parsed = parseCsv(ev.target?.result as string)
-        setRows(parsed)
-        if (!targetPeriodId) setTargetPeriodId(currentPeriod?.id || periods[0]?.id || '')
+        setRows(parseCsv(ev.target?.result as string))
       } catch (err) {
         setParseError((err as Error).message)
       }
@@ -71,11 +68,11 @@ export default function ImportExport() {
   }
 
   async function handleImport() {
-    if (!targetPeriodId || rows.length === 0) return
+    if (rows.length === 0) return
     setImporting(true)
     setImportResult(null)
     try {
-      const result = await importTransactions(targetPeriodId, rows)
+      const result = await importTransactions(rows)
       setImportResult(result)
       if (result.created > 0) {
         setRows([])
@@ -141,9 +138,10 @@ export default function ImportExport() {
         <Card>
           <h2 className={styles.title}>Importar transacciones</h2>
           <p className={styles.desc}>
-            Sube un archivo CSV con columnas: <code>monto</code>, <code>tipo</code> (requeridos, <code>tipo</code> es
-            "income" o "expense") y <code>fecha</code>, <code>categoria</code>, <code>metodo</code>, <code>tarjeta</code>,{' '}
-            <code>descripcion</code> (opcionales). <code>categoria</code> y <code>metodo</code> deben coincidir con
+            Sube un archivo CSV con columnas: <code>monto</code>, <code>tipo</code> ("income" o "expense") y{' '}
+            <code>fecha</code> (YYYY-MM-DD) — requeridas — y <code>categoria</code>, <code>metodo</code>,{' '}
+            <code>tarjeta</code>, <code>descripcion</code> (opcionales). La quincena de cada fila se determina
+            automáticamente según su fecha; <code>categoria</code> y <code>metodo</code> deben coincidir con
             nombres existentes para que la fila se pueda importar.
           </p>
 
@@ -190,18 +188,8 @@ export default function ImportExport() {
               </table>
               {rows.length > 10 && <p className={styles.muted}>... y {rows.length - 10} filas más</p>}
 
-              <FormField label="Quincena de destino">
-                <select value={targetPeriodId} onChange={e => setTargetPeriodId(e.target.value)} disabled={refLoading}>
-                  <option value="">Seleccionar...</option>
-                  {periods.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
-                </select>
-              </FormField>
-              <p className={styles.muted}>
-                Las fechas de las filas deben caer dentro del rango de la quincena elegida; si una fila no trae fecha, se usa el inicio de la quincena.
-              </p>
-
               <div className={styles.actions} style={{ marginTop: 'var(--space-3)' }}>
-                <Button size="sm" onClick={handleImport} disabled={!targetPeriodId || importing}>
+                <Button size="sm" onClick={handleImport} disabled={importing}>
                   {importing ? 'Importando...' : `Importar ${rows.length} fila${rows.length === 1 ? '' : 's'}`}
                 </Button>
               </div>
@@ -211,7 +199,7 @@ export default function ImportExport() {
           {importResult && (
             <div className={styles.result}>
               <p className={importResult.failed > 0 ? styles.warning : styles.success}>
-                {importResult.created} transacción{importResult.created === 1 ? '' : 'es'} importada{importResult.created === 1 ? '' : 's'}
+                {importResult.created} {importResult.created === 1 ? 'transacción importada' : 'transacciones importadas'}
                 {importResult.failed > 0 && `, ${importResult.failed} fila${importResult.failed === 1 ? '' : 's'} con errores`}.
               </p>
               {failedRows.length > 0 && (

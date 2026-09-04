@@ -94,33 +94,33 @@ function findByName<T extends { name: string }>(list: T[], name: string | undefi
 }
 
 // Importación masiva de transacciones desde el CSV de Importar/Exportar.
-// Todas las filas se crean en la misma quincena (period_id) elegida en la UI —
-// evita inferir la quincena por fecha fila por fila, que sería más frágil y
-// menos consistente con la regla del resto de la app (la fecha de una
-// transacción debe caer dentro del rango de su propia quincena).
+// La quincena de cada fila se resuelve por su fecha (obligatoria en el CSV)
+// contra el rango de las quincenas existentes, en vez de exigir que el
+// usuario elija una única quincena de destino — así un archivo que abarca
+// varias quincenas (p. ej. un mes completo) se importa en una sola pasada.
 // La importación es parcial: cada fila se valida y reporta por separado, así
 // una fila con datos inválidos no bloquea el resto del archivo.
 export async function importTransactions(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { period_id, rows } = req.body as { period_id?: string; rows?: ImportRow[] }
-    if (!period_id || !Array.isArray(rows) || rows.length === 0) {
-      res.status(400).json({ error: 'Se requiere period_id y al menos una fila' })
+    const { rows } = req.body as { rows?: ImportRow[] }
+    if (!Array.isArray(rows) || rows.length === 0) {
+      res.status(400).json({ error: 'Se requiere al menos una fila' })
       return
     }
 
-    const periodResult = await pool.query('SELECT * FROM periods WHERE id = $1', [period_id])
-    if (periodResult.rows.length === 0) { res.status(404).json({ error: 'Quincena no encontrada' }); return }
-    const period = periodResult.rows[0]
-
-    const [catsRes, methodsRes, cardsRes] = await Promise.all([
+    const [periodsRes, catsRes, methodsRes, cardsRes] = await Promise.all([
+      pool.query('SELECT id, start_date, end_date FROM periods'),
       pool.query('SELECT id, name FROM categories WHERE is_active = TRUE'),
       pool.query('SELECT id, name, requires_card FROM payment_methods WHERE is_active = TRUE'),
       pool.query('SELECT id, name FROM cards WHERE is_active = TRUE'),
     ])
 
+    const findPeriodForDate = (date: string) =>
+      periodsRes.rows.find((p: { start_date: string; end_date: string }) => date >= p.start_date && date <= p.end_date)
+
     const errors: ImportRowResult[] = []
     const toInsert: {
-      row: number; category_id: string; payment_method_id: string; card_id: string | null
+      row: number; period_id: string; category_id: string; payment_method_id: string; card_id: string | null
       type: string; amount: number; description: string; date: string
     }[] = []
 
@@ -134,6 +134,16 @@ export async function importTransactions(req: Request, res: Response, next: Next
       const type = (row.tipo || '').trim().toLowerCase()
       if (type !== 'income' && type !== 'expense') {
         errors.push({ row: rowNum, status: 'error', error: `Tipo debe ser "income" o "expense", no "${row.tipo || ''}"` })
+        return
+      }
+      const date = (row.fecha || '').trim()
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        errors.push({ row: rowNum, status: 'error', error: `Fecha requerida e inválida: "${date}" (usar YYYY-MM-DD)` })
+        return
+      }
+      const period = findPeriodForDate(date)
+      if (!period) {
+        errors.push({ row: rowNum, status: 'error', error: `No hay ninguna quincena que incluya la fecha ${date}` })
         return
       }
       const category = findByName(catsRes.rows, row.categoria)
@@ -155,25 +165,16 @@ export async function importTransactions(req: Request, res: Response, next: Next
         }
         card_id = card.id
       }
-      const date = (row.fecha || '').trim() || period.start_date
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        errors.push({ row: rowNum, status: 'error', error: `Fecha inválida: "${date}" (usar YYYY-MM-DD)` })
-        return
-      }
-      if (date < period.start_date || date > period.end_date) {
-        errors.push({ row: rowNum, status: 'error', error: `La fecha ${date} está fuera del rango de la quincena (${period.start_date} — ${period.end_date})` })
-        return
-      }
       const description = (row.descripcion || '').trim() || 'Importado'
 
-      toInsert.push({ row: rowNum, category_id: category.id, payment_method_id: method.id, card_id, type, amount, description, date })
+      toInsert.push({ row: rowNum, period_id: period.id, category_id: category.id, payment_method_id: method.id, card_id, type, amount, description, date })
     })
 
     const created = await Promise.all(toInsert.map(t =>
       pool.query(
         `INSERT INTO transactions (period_id, category_id, payment_method_id, card_id, type, amount, description, date)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
-        [period_id, t.category_id, t.payment_method_id, t.card_id, t.type, t.amount, t.description, t.date]
+        [t.period_id, t.category_id, t.payment_method_id, t.card_id, t.type, t.amount, t.description, t.date]
       ).then((r): ImportRowResult => ({ row: t.row, status: 'created', id: r.rows[0].id }))
     ))
 
