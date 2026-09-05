@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Quincena.Api/Quincena.Api.csproj" />
+    <Project Path="src/Quincena.Application/Quincena.Application.csproj" />
+    <Project Path="src/Quincena.Domain/Quincena.Domain.csproj" />
+    <Project Path="src/Quincena.Infrastructure/Quincena.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Quincena.IntegrationTests/Quincena.IntegrationTests.csproj" />
+    <Project Path="tests/Quincena.UnitTests/Quincena.UnitTests.csproj" />
+  </Folder>
+</Solution>
