@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Quincena.Application.Budgets;
 using Quincena.Application.Cards;
 using Quincena.Application.Categories;
+using Quincena.Application.Dashboard;
 using Quincena.Application.PaymentMethods;
 using Quincena.Application.Periods;
 using Quincena.Application.Rollover;
@@ -20,6 +21,7 @@ public static class DependencyInjection
         services.AddScoped<IPaymentMethodService, PaymentMethodService>();
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<IBudgetService, BudgetService>();
+        services.AddScoped<IDashboardService, DashboardService>();
         return services;
     }
 }
