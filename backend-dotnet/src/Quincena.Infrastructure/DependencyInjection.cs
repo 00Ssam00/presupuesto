@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Quincena.Application.Cards;
+using Quincena.Application.Categories;
+using Quincena.Application.PaymentMethods;
 using Quincena.Application.Periods;
 using Quincena.Application.Rollover;
 using Quincena.Infrastructure.Repositories;
@@ -13,6 +16,9 @@ public static class DependencyInjection
         services.AddDbContext<QuincenaDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<IPeriodRepository, PeriodRepository>();
         services.AddScoped<IRolloverDataSource, RolloverDataSource>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<ICardRepository, CardRepository>();
+        services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
         return services;
     }
 }

@@ -1,4 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
+using Quincena.Application.Cards;
+using Quincena.Application.Categories;
+using Quincena.Application.PaymentMethods;
 using Quincena.Application.Periods;
 using Quincena.Application.Rollover;
 
@@ -10,6 +13,9 @@ public static class DependencyInjection
     {
         services.AddScoped<IRolloverService, RolloverService>();
         services.AddScoped<IPeriodService, PeriodService>();
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<ICardService, CardService>();
+        services.AddScoped<IPaymentMethodService, PaymentMethodService>();
         return services;
     }
 }
