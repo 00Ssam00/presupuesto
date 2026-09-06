@@ -37,6 +37,10 @@
       "destination": "https://presupuesto-0qma.onrender.com/api/transactions/:path*"
     },
     {
+      "source": "/api/budgets/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/budgets/:path*"
+    },
+    {
       "source": "/api(/.*)?",
       "destination": {
         "type": "service",
