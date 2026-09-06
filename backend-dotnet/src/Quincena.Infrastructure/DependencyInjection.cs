@@ -5,6 +5,7 @@ using Quincena.Application.Categories;
 using Quincena.Application.PaymentMethods;
 using Quincena.Application.Periods;
 using Quincena.Application.Rollover;
+using Quincena.Application.Transactions;
 using Quincena.Infrastructure.Repositories;
 
 namespace Quincena.Infrastructure;
@@ -19,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ICardRepository, CardRepository>();
         services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
+        services.AddScoped<ITransactionRepository, TransactionRepository>();
         return services;
     }
 }

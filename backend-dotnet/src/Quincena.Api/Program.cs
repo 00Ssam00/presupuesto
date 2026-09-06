@@ -1,4 +1,5 @@
 using Npgsql;
+using Quincena.Api.Middleware;
 using Quincena.Api.Serialization;
 using Quincena.Application;
 using Quincena.Infrastructure;
@@ -51,6 +52,8 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI();
