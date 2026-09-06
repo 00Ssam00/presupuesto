@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Quincena.Api.Serialization;
+using Quincena.Application;
 using Quincena.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,7 +32,8 @@ else
         ?? throw new InvalidOperationException("No hay DATABASE_URL ni ConnectionStrings:DefaultConnection configurados.");
 }
 
-builder.Services.AddDbContext<QuincenaDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddInfrastructure(connectionString);
+builder.Services.AddApplication();
 
 // --- JSON: paridad byte a byte con las respuestas del backend Node actual ---
 builder.Services.AddControllers().AddJsonOptions(options =>
