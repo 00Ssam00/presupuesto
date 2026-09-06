@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Quincena.Application.Budgets;
 using Quincena.Application.Cards;
 using Quincena.Application.Categories;
 using Quincena.Application.PaymentMethods;
@@ -18,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<ICardService, CardService>();
         services.AddScoped<IPaymentMethodService, PaymentMethodService>();
         services.AddScoped<ITransactionService, TransactionService>();
+        services.AddScoped<IBudgetService, BudgetService>();
         return services;
     }
 }

@@ -22,6 +22,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Todas las clases comparten un único Postgres real (sin Testcontainers, ver
+         QuincenaWebApplicationFactory), así que correr colecciones en paralelo hace
+         que tests que asumen una tabla vacía (ej. "no hay ningún período") choquen
+         con fixtures de otras clases insertando/borrando al mismo tiempo. -->
+    <None Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Quincena.Api\Quincena.Api.csproj" />
     <ProjectReference Include="..\..\src\Quincena.Infrastructure\Quincena.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Quincena.Application\Quincena.Application.csproj" />
