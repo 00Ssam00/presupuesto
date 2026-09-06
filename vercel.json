@@ -21,6 +21,18 @@
       "destination": "https://presupuesto-0qma.onrender.com/api/periods/:path*"
     },
     {
+      "source": "/api/categories/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/categories/:path*"
+    },
+    {
+      "source": "/api/cards/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/cards/:path*"
+    },
+    {
+      "source": "/api/payment-methods/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/payment-methods/:path*"
+    },
+    {
       "source": "/api(/.*)?",
       "destination": {
         "type": "service",
