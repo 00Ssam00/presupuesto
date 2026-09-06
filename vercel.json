@@ -17,6 +17,10 @@
   },
   "rewrites": [
     {
+      "source": "/api/periods/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/periods/:path*"
+    },
+    {
       "source": "/api(/.*)?",
       "destination": {
         "type": "service",
