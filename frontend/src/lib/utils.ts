@@ -28,12 +28,12 @@ export function todayISO(): string {
 
 // La fecha de hoy solo tiene sentido como default si cae dentro de la
 // quincena seleccionada; si no, se ajusta al borde más cercano del rango
-// para que la transacción no quede fuera del period_id que se está creando.
-export function clampDateToPeriod(period: { start_date: string; end_date: string } | null | undefined): string {
+// para que la transacción no quede fuera del periodo_id que se está creando.
+export function clampDateToPeriod(period: { fecha_inicio: string; fecha_fin: string } | null | undefined): string {
   const today = todayISO()
   if (!period) return today
-  const start = period.start_date.slice(0, 10)
-  const end = period.end_date.slice(0, 10)
+  const start = period.fecha_inicio.slice(0, 10)
+  const end = period.fecha_fin.slice(0, 10)
   if (today < start) return start
   if (today > end) return end
   return today

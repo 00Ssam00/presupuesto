@@ -5,8 +5,8 @@ let period: TestPeriod
 
 test.beforeAll(async () => {
   period = await createTestPeriod({
-    label: 'E2E Dashboard',
-    base_income: 500000,
+    etiqueta: 'E2E Dashboard',
+    ingreso_base: 500000,
   })
 })
 
@@ -19,11 +19,11 @@ test.describe('Dashboard', () => {
     // El rollover se recalcula automáticamente a partir del sobrante/déficit de la
     // quincena anterior, así que el saldo disponible no es solo el ingreso base.
     const current = await getPeriod(period.id)
-    const expectedAvailable = Number(current.base_income) + Number(current.rollover)
+    const expectedAvailable = Number(current.ingreso_base) + Number(current.arrastre)
     const formatted = Math.round(expectedAvailable).toLocaleString('es-CO')
 
     await page.goto('/dashboard')
-    await page.locator('select').first().selectOption({ label: period.label })
+    await page.locator('select').first().selectOption({ label: period.etiqueta })
 
     await expect(page.locator('[class*="heroAmount"]')).toContainText(formatted)
     await expect(page.locator('[class*="kpiValue"]').first()).toHaveText(/\$\s?0/)
@@ -35,18 +35,18 @@ test.describe('Dashboard', () => {
     // debía quedar fijo en la fecha de hoy sin importar la quincena elegida
     // (bug reportado); ahora debe ajustarse al rango de la quincena.
     await page.goto('/dashboard')
-    await page.locator('select').first().selectOption({ label: period.label })
+    await page.locator('select').first().selectOption({ label: period.etiqueta })
 
     await page.getByRole('button', { name: '+ Agregar gasto' }).click()
     const dateInput = page.getByLabel('Fecha')
-    await expect(dateInput).toHaveValue(period.start_date.slice(0, 10))
+    await expect(dateInput).toHaveValue(period.fecha_inicio.slice(0, 10))
   })
 
   test('la fecha del gasto rápido usa la fecha real de hoy cuando cae dentro de la quincena actual', async ({ page }) => {
     const current = await getCurrentPeriod()
 
     await page.goto('/dashboard')
-    await page.locator('select').first().selectOption({ label: current.label })
+    await page.locator('select').first().selectOption({ label: current.etiqueta })
 
     await page.getByRole('button', { name: '+ Agregar gasto' }).click()
     const today = new Date().toISOString().slice(0, 10)
@@ -55,7 +55,7 @@ test.describe('Dashboard', () => {
 
   test('agregar un gasto rápido actualiza los gastos totales', async ({ page }) => {
     await page.goto('/dashboard')
-    await page.locator('select').first().selectOption({ label: period.label })
+    await page.locator('select').first().selectOption({ label: period.etiqueta })
 
     await page.getByRole('button', { name: '+ Agregar gasto' }).click()
     await page.getByLabel('Monto').fill('30000')

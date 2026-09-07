@@ -17,32 +17,32 @@
   },
   "rewrites": [
     {
-      "source": "/api/periods/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/periods/:path*"
+      "source": "/api/periodos/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/periodos/:path*"
     },
     {
-      "source": "/api/categories/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/categories/:path*"
+      "source": "/api/categorias/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/categorias/:path*"
     },
     {
-      "source": "/api/cards/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/cards/:path*"
+      "source": "/api/tarjetas/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/tarjetas/:path*"
     },
     {
-      "source": "/api/payment-methods/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/payment-methods/:path*"
+      "source": "/api/metodos-pago/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/metodos-pago/:path*"
     },
     {
-      "source": "/api/transactions/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/transactions/:path*"
+      "source": "/api/transacciones/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/transacciones/:path*"
     },
     {
-      "source": "/api/budgets/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/budgets/:path*"
+      "source": "/api/presupuestos/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/presupuestos/:path*"
     },
     {
-      "source": "/api/dashboard/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/dashboard/:path*"
+      "source": "/api/panel/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/panel/:path*"
     },
     {
       "source": "/api(/.*)?",

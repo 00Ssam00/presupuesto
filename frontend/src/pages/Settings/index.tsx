@@ -13,22 +13,22 @@ import {
 } from '../../lib/api'
 import { useReferenceData } from '../../lib/ReferenceDataContext'
 import { formatDate } from '../../lib/utils'
-import type { Category, Card as CardType } from '../../types'
+import type { Categoria, Tarjeta } from '../../types'
 import styles from './Settings.module.css'
 
 export default function Settings() {
   const { categories, cards, periods, loading, refresh } = useReferenceData()
 
   const [catModal, setCatModal] = useState(false)
-  const [editingCat, setEditingCat] = useState<Category | null>(null)
-  const [catForm, setCatForm] = useState({ name: '', color: '#01696f' })
+  const [editingCat, setEditingCat] = useState<Categoria | null>(null)
+  const [catForm, setCatForm] = useState({ nombre: '', color: '#01696f' })
 
   const [cardModal, setCardModal] = useState(false)
-  const [editingCard, setEditingCard] = useState<CardType | null>(null)
-  const [cardForm, setCardForm] = useState({ name: '', last_four: '', bank: '' })
+  const [editingCard, setEditingCard] = useState<Tarjeta | null>(null)
+  const [cardForm, setCardForm] = useState({ nombre: '', ultimos_cuatro: '', banco: '' })
 
   const [periodModal, setPeriodModal] = useState(false)
-  const [periodForm, setPeriodForm] = useState({ label: '', start_date: '', end_date: '', base_income: '' })
+  const [periodForm, setPeriodForm] = useState({ etiqueta: '', fecha_inicio: '', fecha_fin: '', ingreso_base: '' })
 
   async function saveCat(e: React.FormEvent) {
     e.preventDefault()
@@ -48,7 +48,7 @@ export default function Settings() {
 
   async function savePeriod(e: React.FormEvent) {
     e.preventDefault()
-    await createPeriod({ ...periodForm, base_income: parseFloat(periodForm.base_income) })
+    await createPeriod({ ...periodForm, ingreso_base: parseFloat(periodForm.ingreso_base) })
     setPeriodModal(false)
     refresh()
   }
@@ -63,7 +63,7 @@ export default function Settings() {
         <Card>
           <div className={styles.secHead}>
             <h2 className={styles.secTitle}>Categorías</h2>
-            <Button size="sm" onClick={() => { setEditingCat(null); setCatForm({ name: '', color: '#01696f' }); setCatModal(true) }}>
+            <Button size="sm" onClick={() => { setEditingCat(null); setCatForm({ nombre: '', color: '#01696f' }); setCatModal(true) }}>
               + Agregar
             </Button>
           </div>
@@ -72,10 +72,10 @@ export default function Settings() {
             {!loading && categories.map(c => (
               <div key={c.id} className={styles.listItem}>
                 <span className={styles.dot} style={{ background: c.color }} />
-                <span className={styles.itemName}>{c.name}</span>
+                <span className={styles.itemName}>{c.nombre}</span>
                 <div className={styles.itemActions}>
                   <Button variant="ghost" size="sm" onClick={() => {
-                    setEditingCat(c); setCatForm({ name: c.name, color: c.color }); setCatModal(true)
+                    setEditingCat(c); setCatForm({ nombre: c.nombre, color: c.color }); setCatModal(true)
                   }}>Editar</Button>
                   <Button variant="ghost" size="sm" onClick={async () => {
                     if (!confirm('¿Desactivar?')) return
@@ -92,7 +92,7 @@ export default function Settings() {
         <Card>
           <div className={styles.secHead}>
             <h2 className={styles.secTitle}>Tarjetas de crédito</h2>
-            <Button size="sm" onClick={() => { setEditingCard(null); setCardForm({ name: '', last_four: '', bank: '' }); setCardModal(true) }}>
+            <Button size="sm" onClick={() => { setEditingCard(null); setCardForm({ nombre: '', ultimos_cuatro: '', banco: '' }); setCardModal(true) }}>
               + Agregar
             </Button>
           </div>
@@ -101,12 +101,12 @@ export default function Settings() {
             {!loading && cards.length === 0 && <p className={styles.empty}>Sin tarjetas registradas</p>}
             {!loading && cards.map(c => (
               <div key={c.id} className={styles.listItem}>
-                <span className={styles.itemName}>{c.name}</span>
-                {c.last_four && <Badge variant="default">···{c.last_four}</Badge>}
-                {c.bank && <span className={styles.muted}>{c.bank}</span>}
+                <span className={styles.itemName}>{c.nombre}</span>
+                {c.ultimos_cuatro && <Badge variant="default">···{c.ultimos_cuatro}</Badge>}
+                {c.banco && <span className={styles.muted}>{c.banco}</span>}
                 <div className={styles.itemActions}>
                   <Button variant="ghost" size="sm" onClick={() => {
-                    setEditingCard(c); setCardForm({ name: c.name, last_four: c.last_four || '', bank: c.bank || '' }); setCardModal(true)
+                    setEditingCard(c); setCardForm({ nombre: c.nombre, ultimos_cuatro: c.ultimos_cuatro || '', banco: c.banco || '' }); setCardModal(true)
                   }}>Editar</Button>
                   <Button variant="ghost" size="sm" onClick={async () => {
                     if (!confirm('¿Desactivar?')) return
@@ -123,7 +123,7 @@ export default function Settings() {
         <Card>
           <div className={styles.secHead}>
             <h2 className={styles.secTitle}>Quincenas</h2>
-            <Button size="sm" onClick={() => { setPeriodForm({ label: '', start_date: '', end_date: '', base_income: '' }); setPeriodModal(true) }}>
+            <Button size="sm" onClick={() => { setPeriodForm({ etiqueta: '', fecha_inicio: '', fecha_fin: '', ingreso_base: '' }); setPeriodModal(true) }}>
               + Nueva quincena
             </Button>
           </div>
@@ -131,9 +131,9 @@ export default function Settings() {
             {loading && <ListSkeleton />}
             {!loading && periods.slice(0, 8).map(p => (
               <div key={p.id} className={styles.listItem}>
-                <span className={styles.itemName}>{p.label}</span>
-                <span className={styles.muted}>{formatDate(p.start_date)} — {formatDate(p.end_date)}</span>
-                {p.is_closed && <Badge variant="warning">Cerrada</Badge>}
+                <span className={styles.itemName}>{p.etiqueta}</span>
+                <span className={styles.muted}>{formatDate(p.fecha_inicio)} — {formatDate(p.fecha_fin)}</span>
+                {p.esta_cerrado && <Badge variant="warning">Cerrada</Badge>}
                 <Button variant="ghost" size="sm" onClick={async () => {
                   if (!confirm('¿Eliminar quincena?')) return
                   await deletePeriod(p.id)
@@ -150,7 +150,7 @@ export default function Settings() {
       <Modal open={catModal} onClose={() => setCatModal(false)} title={editingCat ? 'Editar categoría' : 'Nueva categoría'}>
         <form onSubmit={saveCat} className={styles.form}>
           <FormField label="Nombre">
-            <input type="text" value={catForm.name} onChange={e => setCatForm(f => ({ ...f, name: e.target.value }))} required />
+            <input type="text" value={catForm.nombre} onChange={e => setCatForm(f => ({ ...f, nombre: e.target.value }))} required />
           </FormField>
           <FormField label="Color">
             <input type="color" value={catForm.color} onChange={e => setCatForm(f => ({ ...f, color: e.target.value }))} style={{ height: 40 }} />
@@ -166,14 +166,14 @@ export default function Settings() {
       <Modal open={cardModal} onClose={() => setCardModal(false)} title={editingCard ? 'Editar tarjeta' : 'Nueva tarjeta'}>
         <form onSubmit={saveCard} className={styles.form}>
           <FormField label="Nombre de la tarjeta">
-            <input type="text" value={cardForm.name} onChange={e => setCardForm(f => ({ ...f, name: e.target.value }))} required />
+            <input type="text" value={cardForm.nombre} onChange={e => setCardForm(f => ({ ...f, nombre: e.target.value }))} required />
           </FormField>
           <div className={styles.row}>
             <FormField label="Últimos 4 dígitos">
-              <input type="text" maxLength={4} value={cardForm.last_four} onChange={e => setCardForm(f => ({ ...f, last_four: e.target.value }))} />
+              <input type="text" maxLength={4} value={cardForm.ultimos_cuatro} onChange={e => setCardForm(f => ({ ...f, ultimos_cuatro: e.target.value }))} />
             </FormField>
             <FormField label="Banco">
-              <input type="text" value={cardForm.bank} onChange={e => setCardForm(f => ({ ...f, bank: e.target.value }))} />
+              <input type="text" value={cardForm.banco} onChange={e => setCardForm(f => ({ ...f, banco: e.target.value }))} />
             </FormField>
           </div>
           <div className={styles.formActions}>
@@ -187,20 +187,20 @@ export default function Settings() {
       <Modal open={periodModal} onClose={() => setPeriodModal(false)} title="Nueva quincena">
         <form onSubmit={savePeriod} className={styles.form}>
           <FormField label="Etiqueta">
-            <input type="text" placeholder="1ra quincena Mayo 2026" value={periodForm.label}
-              onChange={e => setPeriodForm(f => ({ ...f, label: e.target.value }))} required />
+            <input type="text" placeholder="1ra quincena Mayo 2026" value={periodForm.etiqueta}
+              onChange={e => setPeriodForm(f => ({ ...f, etiqueta: e.target.value }))} required />
           </FormField>
           <div className={styles.row}>
             <FormField label="Inicio">
-              <input type="date" value={periodForm.start_date} onChange={e => setPeriodForm(f => ({ ...f, start_date: e.target.value }))} required />
+              <input type="date" value={periodForm.fecha_inicio} onChange={e => setPeriodForm(f => ({ ...f, fecha_inicio: e.target.value }))} required />
             </FormField>
             <FormField label="Fin">
-              <input type="date" value={periodForm.end_date} onChange={e => setPeriodForm(f => ({ ...f, end_date: e.target.value }))} required />
+              <input type="date" value={periodForm.fecha_fin} onChange={e => setPeriodForm(f => ({ ...f, fecha_fin: e.target.value }))} required />
             </FormField>
           </div>
           <FormField label="Ingreso base">
-            <input type="number" min="0" value={periodForm.base_income}
-              onChange={e => setPeriodForm(f => ({ ...f, base_income: e.target.value }))} required />
+            <input type="number" min="0" value={periodForm.ingreso_base}
+              onChange={e => setPeriodForm(f => ({ ...f, ingreso_base: e.target.value }))} required />
           </FormField>
           <div className={styles.formActions}>
             <Button type="button" variant="secondary" onClick={() => setPeriodModal(false)}>Cancelar</Button>

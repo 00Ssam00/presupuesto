@@ -1,66 +1,68 @@
-export interface Period {
+export interface Periodo {
   id: string
-  label: string
-  start_date: string
-  end_date: string
-  base_income: number
-  rollover: number
-  is_closed: boolean
-  created_at: string
+  etiqueta: string
+  fecha_inicio: string
+  fecha_fin: string
+  ingreso_base: number
+  arrastre: number
+  esta_cerrado: boolean
+  creado_en: string
 }
 
-export interface Category {
+export interface Categoria {
   id: string
-  name: string
+  nombre: string
   color: string
-  icon: string | null
-  is_active: boolean
-  sort_order: number
+  icono: string | null
+  esta_activo: boolean
+  orden: number
 }
 
-export interface PaymentMethod {
+export interface MetodoPago {
   id: string
-  name: string
-  requires_card: boolean
-  is_active: boolean
+  nombre: string
+  requiere_tarjeta: boolean
+  esta_activo: boolean
 }
 
-export interface Card {
+export interface Tarjeta {
   id: string
-  name: string
-  last_four: string | null
-  bank: string | null
-  is_active: boolean
+  nombre: string
+  ultimos_cuatro: string | null
+  banco: string | null
+  esta_activo: boolean
 }
 
-export interface Transaction {
+export interface Transaccion {
   id: string
-  period_id: string
-  category_id: string
-  payment_method_id: string
-  card_id: string | null
-  type: 'income' | 'expense'
-  amount: number
-  description: string
-  note: string | null
-  date: string
-  category_name?: string
-  category_color?: string
-  payment_method_name?: string
-  card_name?: string
+  periodo_id: string
+  categoria_id: string
+  metodo_pago_id: string
+  tarjeta_id: string | null
+  tipo: 'income' | 'expense'
+  monto: number
+  descripcion: string
+  nota: string | null
+  fecha: string
+  nombre_categoria?: string
+  color_categoria?: string
+  nombre_metodo_pago?: string
+  nombre_tarjeta?: string
 }
 
-export interface Budget {
+export interface Presupuesto {
   id: string | null
-  period_id: string
-  category_id: string
-  amount: number
-  percentage: number | null
-  category_name?: string
-  category_color?: string
-  spent?: number
+  periodo_id: string
+  categoria_id: string
+  monto: number
+  porcentaje: number | null
+  nombre_categoria?: string
+  color_categoria?: string
+  gastado?: number
 }
 
+// Goal y UpcomingPayment siguen en inglés: todavía los sirve el backend Node
+// (Fase 7 de la migración, pendiente), no el backend .NET ya traducido.
 export interface Goal {
   id: string
   name: string
@@ -85,18 +87,35 @@ export interface UpcomingPayment {
   category_color?: string
 }
 
-export interface DashboardData {
-  period: Period
-  available: number
-  total_expenses: number
-  total_income_extra: number
-  remaining: number
-  expenses_by_category: Array<{
-    category_id: string
-    category_name: string
-    category_color: string
+// Forma en español de un pago próximo tal como lo anida /api/panel/{id} (ya
+// migrado a .NET) — distinta de UpcomingPayment de arriba, que sigue siendo la
+// forma en inglés del CRUD independiente que todavía sirve Node.
+export interface PagoProximoPanel {
+  id: string
+  periodo_id: string | null
+  categoria_id: string
+  nombre: string
+  monto: number
+  fecha_vencimiento: string
+  estado: 'pending' | 'paid' | 'overdue'
+  es_recurrente: boolean
+  intervalo_recurrencia: 'weekly' | 'biweekly' | 'monthly' | null
+  nombre_categoria?: string
+  color_categoria?: string
+}
+
+export interface DatosPanel {
+  periodo: Periodo
+  disponible: number
+  total_gastos: number
+  total_ingreso_extra: number
+  restante: number
+  gastos_por_categoria: Array<{
+    categoria_id: string
+    nombre_categoria: string
+    color_categoria: string
     total: number
-    budget: number
+    presupuesto: number
   }>
-  upcoming_payments: UpcomingPayment[]
+  pagos_proximos: PagoProximoPanel[]
 }

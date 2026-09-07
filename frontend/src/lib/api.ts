@@ -1,8 +1,8 @@
 import axios from 'axios'
 import { showToast } from './toast'
 import type {
-  Period, Transaction, Category, Budget,
-  Goal, UpcomingPayment, Card, PaymentMethod, DashboardData
+  Periodo, Transaccion, Categoria, Presupuesto,
+  Goal, UpcomingPayment, Tarjeta, MetodoPago, DatosPanel
 } from '../types'
 
 const api = axios.create({
@@ -41,21 +41,21 @@ api.interceptors.response.use(
 
 // Dashboard
 export const getDashboard = (periodId: string) =>
-  api.get<DashboardData>(`/dashboard/${periodId}`).then(r => r.data)
+  api.get<DatosPanel>(`/panel/${periodId}`).then(r => r.data)
 
 // Periods
-export const getPeriods        = ()   => api.get<Period[]>('/periods').then(r => r.data)
-export const getCurrentPeriod  = ()   => api.get<Period>('/periods/current').then(r => r.data)
-export const createPeriod      = (d: Partial<Period>) => api.post<Period>('/periods', d).then(r => r.data)
-export const updatePeriod      = (id: string, d: Partial<Period>) => api.put<Period>(`/periods/${id}`, d).then(r => r.data)
-export const deletePeriod      = (id: string) => api.delete(`/periods/${id}`)
+export const getPeriods        = ()   => api.get<Periodo[]>('/periodos').then(r => r.data)
+export const getCurrentPeriod  = ()   => api.get<Periodo>('/periodos/actual').then(r => r.data)
+export const createPeriod      = (d: Partial<Periodo>) => api.post<Periodo>('/periodos', d).then(r => r.data)
+export const updatePeriod      = (id: string, d: Partial<Periodo>) => api.put<Periodo>(`/periodos/${id}`, d).then(r => r.data)
+export const deletePeriod      = (id: string) => api.delete(`/periodos/${id}`)
 
 // Transactions
 export const getTransactions = (params?: Record<string, string>) =>
-  api.get<Transaction[]>('/transactions', { params }).then(r => r.data)
-export const createTransaction = (d: Partial<Transaction>) => api.post<Transaction>('/transactions', d).then(r => r.data)
-export const updateTransaction = (id: string, d: Partial<Transaction>) => api.put<Transaction>(`/transactions/${id}`, d).then(r => r.data)
-export const deleteTransaction = (id: string) => api.delete(`/transactions/${id}`)
+  api.get<Transaccion[]>('/transacciones', { params }).then(r => r.data)
+export const createTransaction = (d: Partial<Transaccion>) => api.post<Transaccion>('/transacciones', d).then(r => r.data)
+export const updateTransaction = (id: string, d: Partial<Transaccion>) => api.put<Transaccion>(`/transacciones/${id}`, d).then(r => r.data)
+export const deleteTransaction = (id: string) => api.delete(`/transacciones/${id}`)
 
 export interface ImportRow {
   monto?: string
@@ -67,29 +67,29 @@ export interface ImportRow {
   descripcion?: string
 }
 export interface ImportRowResult {
-  row: number
-  status: 'created' | 'error'
+  fila: number
+  estado: 'created' | 'error'
   id?: string
   error?: string
 }
 export interface ImportResponse {
-  created: number
-  failed: number
-  results: ImportRowResult[]
+  creados: number
+  fallidos: number
+  resultados: ImportRowResult[]
 }
 export const importTransactions = (rows: ImportRow[]) =>
-  api.post<ImportResponse>('/transactions/import', { rows }).then(r => r.data)
+  api.post<ImportResponse>('/transacciones/importar', { filas: rows }).then(r => r.data)
 
 // Categories
-export const getCategories    = () => api.get<Category[]>('/categories').then(r => r.data)
-export const createCategory   = (d: Partial<Category>) => api.post<Category>('/categories', d).then(r => r.data)
-export const updateCategory   = (id: string, d: Partial<Category>) => api.put<Category>(`/categories/${id}`, d).then(r => r.data)
-export const deleteCategory   = (id: string) => api.delete(`/categories/${id}`)
+export const getCategories    = () => api.get<Categoria[]>('/categorias').then(r => r.data)
+export const createCategory   = (d: Partial<Categoria>) => api.post<Categoria>('/categorias', d).then(r => r.data)
+export const updateCategory   = (id: string, d: Partial<Categoria>) => api.put<Categoria>(`/categorias/${id}`, d).then(r => r.data)
+export const deleteCategory   = (id: string) => api.delete(`/categorias/${id}`)
 
 // Budgets
-export const getBudgets    = (periodId: string) => api.get<Budget[]>(`/budgets/period/${periodId}`).then(r => r.data)
-export const upsertBudget  = (d: Partial<Budget>) => api.post<Budget>('/budgets', d).then(r => r.data)
-export const deleteBudget  = (id: string) => api.delete(`/budgets/${id}`)
+export const getBudgets    = (periodId: string) => api.get<Presupuesto[]>(`/presupuestos/periodo/${periodId}`).then(r => r.data)
+export const upsertBudget  = (d: Partial<Presupuesto>) => api.post<Presupuesto>('/presupuestos', d).then(r => r.data)
+export const deleteBudget  = (id: string) => api.delete(`/presupuestos/${id}`)
 
 // Goals
 export const getGoals    = () => api.get<Goal[]>('/goals').then(r => r.data)
@@ -105,13 +105,13 @@ export const updateUpcomingPayment  = (id: string, d: Partial<UpcomingPayment>) 
 export const deleteUpcomingPayment  = (id: string) => api.delete(`/upcoming-payments/${id}`)
 
 // Cards
-export const getCards    = () => api.get<Card[]>('/cards').then(r => r.data)
-export const createCard  = (d: Partial<Card>) => api.post<Card>('/cards', d).then(r => r.data)
-export const updateCard  = (id: string, d: Partial<Card>) => api.put<Card>(`/cards/${id}`, d).then(r => r.data)
-export const deleteCard  = (id: string) => api.delete(`/cards/${id}`)
+export const getCards    = () => api.get<Tarjeta[]>('/tarjetas').then(r => r.data)
+export const createCard  = (d: Partial<Tarjeta>) => api.post<Tarjeta>('/tarjetas', d).then(r => r.data)
+export const updateCard  = (id: string, d: Partial<Tarjeta>) => api.put<Tarjeta>(`/tarjetas/${id}`, d).then(r => r.data)
+export const deleteCard  = (id: string) => api.delete(`/tarjetas/${id}`)
 
 // Payment methods
-export const getPaymentMethods = () => api.get<PaymentMethod[]>('/payment-methods').then(r => r.data)
+export const getPaymentMethods = () => api.get<MetodoPago[]>('/metodos-pago').then(r => r.data)
 
 // Settings
 export const getSettings    = () => api.get<Record<string, string>>('/settings').then(r => r.data)

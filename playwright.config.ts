@@ -18,6 +18,14 @@ export default defineConfig({
       timeout: 30_000,
     },
     {
+      // Backend .NET: sirve en español los recursos ya migrados (ver vite.config.ts proxy).
+      command: 'dotnet run --no-launch-profile --project backend-dotnet/src/Quincena.Api --urls http://localhost:5080',
+      url: 'http://localhost:5080/api/health',
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+      env: { ASPNETCORE_ENVIRONMENT: 'Development' },
+    },
+    {
       command: 'npm run dev --prefix frontend',
       url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,

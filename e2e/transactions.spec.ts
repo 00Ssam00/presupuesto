@@ -4,7 +4,7 @@ import { createTestPeriod, deletePeriod, type TestPeriod } from './helpers/api'
 let period: TestPeriod
 
 test.beforeAll(async () => {
-  period = await createTestPeriod({ label: 'E2E Transacciones' })
+  period = await createTestPeriod({ etiqueta: 'E2E Transacciones' })
 })
 
 test.afterAll(async () => {
@@ -15,12 +15,12 @@ test.describe('Transacciones', () => {
   test('crear, editar y eliminar una transacción desde la UI', async ({ page }) => {
     await page.goto('/transactions')
 
-    await page.locator('select').first().selectOption({ label: period.label })
+    await page.locator('select').first().selectOption({ label: period.etiqueta })
     await expect(page.getByText('Sin transacciones')).toBeVisible()
 
     // Crear
     await page.getByRole('button', { name: '+ Nueva transacción' }).click()
-    await page.getByLabel('Quincena').selectOption({ label: period.label })
+    await page.getByLabel('Quincena').selectOption({ label: period.etiqueta })
     await page.getByLabel('Tipo').selectOption('expense')
     await page.getByLabel('Monto').fill('75000')
     await page.getByLabel('Descripción').fill('Compra E2E')

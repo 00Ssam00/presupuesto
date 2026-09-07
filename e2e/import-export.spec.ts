@@ -3,19 +3,19 @@ import { createTestPeriod, deletePeriod, getFirstCategory, getCashPaymentMethod,
 
 let periodA: TestPeriod
 let periodB: TestPeriod
-let category: { id: string; name: string }
-let method: { id: string; name: string }
+let category: { id: string; nombre: string }
+let method: { id: string; nombre: string }
 
 test.beforeAll(async () => {
   periodA = await createTestPeriod({
-    label: 'E2E Import Export A',
-    start_date: '2099-03-01',
-    end_date: '2099-03-15',
+    etiqueta: 'E2E Import Export A',
+    fecha_inicio: '2099-03-01',
+    fecha_fin: '2099-03-15',
   })
   periodB = await createTestPeriod({
-    label: 'E2E Import Export B',
-    start_date: '2099-03-16',
-    end_date: '2099-03-31',
+    etiqueta: 'E2E Import Export B',
+    fecha_inicio: '2099-03-16',
+    fecha_fin: '2099-03-31',
   })
   category = await getFirstCategory()
   method = await getCashPaymentMethod()
@@ -30,9 +30,9 @@ test.describe('Importar / Exportar', () => {
   test('importa un CSV que abarca dos quincenas en una sola pasada, resolviendo cada fila por su fecha', async ({ page }) => {
     const csv = [
       'monto,tipo,fecha,categoria,metodo,descripcion',
-      `50000,expense,2099-03-05,${category.name},${method.name},"Compra E2E, con coma en la descripción"`,
-      `30000,expense,2099-03-20,${category.name},${method.name},Compra en la segunda quincena`,
-      `20000,expense,2099-03-06,Categoría Inexistente E2E,${method.name},Fila inválida`,
+      `50000,expense,2099-03-05,${category.nombre},${method.nombre},"Compra E2E, con coma en la descripción"`,
+      `30000,expense,2099-03-20,${category.nombre},${method.nombre},Compra en la segunda quincena`,
+      `20000,expense,2099-03-06,Categoría Inexistente E2E,${method.nombre},Fila inválida`,
     ].join('\n')
 
     await page.goto('/import')
@@ -54,16 +54,16 @@ test.describe('Importar / Exportar', () => {
 
     // Cada transacción quedó en la quincena que le corresponde por fecha.
     await page.goto('/transactions')
-    await page.locator('select').first().selectOption({ label: periodA.label })
+    await page.locator('select').first().selectOption({ label: periodA.etiqueta })
     await expect(page.getByText('Compra E2E, con coma en la descripción')).toBeVisible()
-    await page.locator('select').first().selectOption({ label: periodB.label })
+    await page.locator('select').first().selectOption({ label: periodB.etiqueta })
     await expect(page.getByText('Compra en la segunda quincena')).toBeVisible()
   })
 
   test('rechaza una fila cuya fecha no cae en ninguna quincena existente', async ({ page }) => {
     const csv = [
       'monto,tipo,fecha,categoria,metodo,descripcion',
-      `10000,expense,2199-01-01,${category.name},${method.name},Fecha sin quincena`,
+      `10000,expense,2199-01-01,${category.nombre},${method.nombre},Fecha sin quincena`,
     ].join('\n')
 
     await page.goto('/import')
@@ -81,7 +81,7 @@ test.describe('Importar / Exportar', () => {
     await page.goto('/import')
 
     const exportSelect = page.getByLabel('Quincena')
-    await exportSelect.selectOption({ label: periodA.label })
+    await exportSelect.selectOption({ label: periodA.etiqueta })
 
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -96,7 +96,7 @@ test.describe('Importar / Exportar', () => {
     expect(content).toContain('monto,tipo,fecha,categoria,metodo,tarjeta,descripcion')
     // La fila con coma en la descripción debe volver escapada entre comillas.
     expect(content).toContain('"Compra E2E, con coma en la descripción"')
-    expect(content).toContain(category.name)
+    expect(content).toContain(category.nombre)
     // No debe incluir transacciones de la otra quincena.
     expect(content).not.toContain('Compra en la segunda quincena')
   })

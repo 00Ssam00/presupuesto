@@ -1,13 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { getCategories, getPaymentMethods, getCards, getPeriods, getCurrentPeriod } from './api'
-import type { Category, PaymentMethod, Card, Period } from '../types'
+import type { Categoria, MetodoPago, Tarjeta, Periodo } from '../types'
 
 interface ReferenceData {
-  categories: Category[]
-  methods: PaymentMethod[]
-  cards: Card[]
-  periods: Period[]
-  currentPeriod: Period | null
+  categories: Categoria[]
+  methods: MetodoPago[]
+  cards: Tarjeta[]
+  periods: Periodo[]
+  currentPeriod: Periodo | null
   loading: boolean
   error: string
   refresh: () => Promise<void>
@@ -19,11 +19,11 @@ const ReferenceDataContext = createContext<ReferenceData | null>(null)
 // muy poco (solo desde Configuración) — se cargan una sola vez por sesión en
 // vez de que cada pantalla las vuelva a pedir al servidor en cada navegación.
 export function ReferenceDataProvider({ children }: { children: ReactNode }) {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [methods, setMethods] = useState<PaymentMethod[]>([])
-  const [cards, setCards] = useState<Card[]>([])
-  const [periods, setPeriods] = useState<Period[]>([])
-  const [currentPeriod, setCurrentPeriod] = useState<Period | null>(null)
+  const [categories, setCategories] = useState<Categoria[]>([])
+  const [methods, setMethods] = useState<MetodoPago[]>([])
+  const [cards, setCards] = useState<Tarjeta[]>([])
+  const [periods, setPeriods] = useState<Periodo[]>([])
+  const [currentPeriod, setCurrentPeriod] = useState<Periodo | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 

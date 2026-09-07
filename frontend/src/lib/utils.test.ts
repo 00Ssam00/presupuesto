@@ -80,21 +80,21 @@ describe('clampDateToPeriod', () => {
   it('devuelve hoy si cae dentro del rango de la quincena', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-06-20T12:00:00.000Z'))
-    const period = { start_date: '2026-06-16', end_date: '2026-06-30' }
+    const period = { fecha_inicio: '2026-06-16', fecha_fin: '2026-06-30' }
     expect(clampDateToPeriod(period)).toBe('2026-06-20')
   })
 
   it('ajusta al inicio de la quincena si hoy es anterior a su rango', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-06-01T12:00:00.000Z'))
-    const period = { start_date: '2026-06-16', end_date: '2026-06-30' }
+    const period = { fecha_inicio: '2026-06-16', fecha_fin: '2026-06-30' }
     expect(clampDateToPeriod(period)).toBe('2026-06-16')
   })
 
   it('ajusta al final de la quincena si hoy es posterior a su rango', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-07-15T12:00:00.000Z'))
-    const period = { start_date: '2026-06-16', end_date: '2026-06-30' }
+    const period = { fecha_inicio: '2026-06-16', fecha_fin: '2026-06-30' }
     expect(clampDateToPeriod(period)).toBe('2026-06-30')
   })
 
@@ -102,10 +102,10 @@ describe('clampDateToPeriod', () => {
     expect(clampDateToPeriod(null)).toBe(todayISO())
   })
 
-  it('tolera timestamps ISO completos en start_date/end_date', () => {
+  it('tolera timestamps ISO completos en fecha_inicio/fecha_fin', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-06-01T12:00:00.000Z'))
-    const period = { start_date: '2026-06-16T00:00:00.000Z', end_date: '2026-06-30T00:00:00.000Z' }
+    const period = { fecha_inicio: '2026-06-16T00:00:00.000Z', fecha_fin: '2026-06-30T00:00:00.000Z' }
     expect(clampDateToPeriod(period)).toBe('2026-06-16')
   })
 })

@@ -7,7 +7,7 @@ import { importTransactions, getTransactions } from '../../lib/api'
 import { useReferenceData } from '../../lib/ReferenceDataContext'
 import { parseCsvLine, csvEscapeField } from '../../lib/utils'
 import type { ImportResponse } from '../../lib/api'
-import type { Transaction } from '../../types'
+import type { Transaccion } from '../../types'
 import styles from './Import.module.css'
 
 interface CsvRow {
@@ -74,7 +74,7 @@ export default function ImportExport() {
     try {
       const result = await importTransactions(rows)
       setImportResult(result)
-      if (result.created > 0) {
+      if (result.creados > 0) {
         setRows([])
         if (fileRef.current) fileRef.current.value = ''
       }
@@ -101,19 +101,19 @@ export default function ImportExport() {
   async function handleExport() {
     setExporting(true)
     try {
-      const params = exportPeriodId ? { period_id: exportPeriodId } : undefined
+      const params = exportPeriodId ? { periodo_id: exportPeriodId } : undefined
       const transactions = await getTransactions(params)
       const header = ['monto', 'tipo', 'fecha', 'categoria', 'metodo', 'tarjeta', 'descripcion']
       const lines = [header.join(',')]
-      transactions.forEach((t: Transaction) => {
+      transactions.forEach((t: Transaccion) => {
         lines.push([
-          String(t.amount),
-          t.type,
-          t.date.slice(0, 10),
-          t.category_name || '',
-          t.payment_method_name || '',
-          t.card_name || '',
-          t.description,
+          String(t.monto),
+          t.tipo,
+          t.fecha.slice(0, 10),
+          t.nombre_categoria || '',
+          t.nombre_metodo_pago || '',
+          t.nombre_tarjeta || '',
+          t.descripcion,
         ].map(csvEscapeField).join(','))
       })
       const blob = new Blob([lines.join('\n')], { type: 'text/csv' })
@@ -128,7 +128,7 @@ export default function ImportExport() {
     }
   }
 
-  const failedRows = importResult?.results.filter(r => r.status === 'error') || []
+  const failedRows = importResult?.resultados.filter(r => r.estado === 'error') || []
 
   return (
     <div>
@@ -198,14 +198,14 @@ export default function ImportExport() {
 
           {importResult && (
             <div className={styles.result}>
-              <p className={importResult.failed > 0 ? styles.warning : styles.success}>
-                {importResult.created} {importResult.created === 1 ? 'transacción importada' : 'transacciones importadas'}
-                {importResult.failed > 0 && `, ${importResult.failed} fila${importResult.failed === 1 ? '' : 's'} con errores`}.
+              <p className={importResult.fallidos > 0 ? styles.warning : styles.success}>
+                {importResult.creados} {importResult.creados === 1 ? 'transacción importada' : 'transacciones importadas'}
+                {importResult.fallidos > 0 && `, ${importResult.fallidos} fila${importResult.fallidos === 1 ? '' : 's'} con errores`}.
               </p>
               {failedRows.length > 0 && (
                 <ul className={styles.errorList}>
                   {failedRows.map(r => (
-                    <li key={r.row}>Fila {r.row}: {r.error}</li>
+                    <li key={r.fila}>Fila {r.fila}: {r.error}</li>
                   ))}
                 </ul>
               )}
@@ -219,7 +219,7 @@ export default function ImportExport() {
           <FormField label="Quincena">
             <select value={exportPeriodId} onChange={e => setExportPeriodId(e.target.value)} disabled={refLoading}>
               <option value="">Todas las quincenas</option>
-              {periods.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
+              {periods.map(p => <option key={p.id} value={p.id}>{p.etiqueta}</option>)}
             </select>
           </FormField>
           <Button variant="secondary" size="sm" onClick={handleExport} disabled={exporting}>
