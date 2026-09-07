@@ -8,7 +8,7 @@ import Button from '../../components/ui/Button'
 import Modal from '../../components/ui/Modal'
 import FormField from '../../components/ui/FormField'
 import Skeleton from '../../components/ui/Skeleton'
-import { getDashboard, createTransaction } from '../../lib/api'
+import { obtenerPanel, crearTransaccion } from '../../lib/api'
 import { useReferenceData } from '../../lib/ReferenceDataContext'
 import { formatCOP, formatShortDate, pct, todayISO, clampDateToPeriod } from '../../lib/utils'
 import type { DatosPanel } from '../../types'
@@ -56,7 +56,7 @@ export default function Dashboard() {
     } else {
       setRefreshing(true)
     }
-    getDashboard(selectedId)
+    obtenerPanel(selectedId)
       .then(setData)
       .catch(() => setError('Error al cargar el dashboard.'))
       .finally(() => { setLoading(false); setRefreshing(false) })
@@ -71,13 +71,13 @@ export default function Dashboard() {
     e.preventDefault()
     setSaving(true)
     try {
-      await createTransaction({
+      await crearTransaccion({
         ...txForm,
         monto: parseFloat(txForm.monto),
         tarjeta_id: requiresCard ? txForm.tarjeta_id : undefined,
       })
       setTxModal(false)
-      getDashboard(selectedId).then(setData)
+      obtenerPanel(selectedId).then(setData)
     } finally {
       setSaving(false)
     }

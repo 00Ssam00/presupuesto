@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { getCategories, getPaymentMethods, getCards, getPeriods, getCurrentPeriod } from './api'
+import { obtenerCategorias, obtenerMetodosPago, obtenerTarjetas, obtenerPeriodos, obtenerPeriodoActual } from './api'
 import type { Categoria, MetodoPago, Tarjeta, Periodo } from '../types'
 
 interface ReferenceData {
@@ -29,11 +29,11 @@ export function ReferenceDataProvider({ children }: { children: ReactNode }) {
 
   const load = useCallback(() => {
     return Promise.all([
-      getCategories(),
-      getPaymentMethods(),
-      getCards(),
-      getPeriods(),
-      getCurrentPeriod().catch(() => null),
+      obtenerCategorias(),
+      obtenerMetodosPago(),
+      obtenerTarjetas(),
+      obtenerPeriodos(),
+      obtenerPeriodoActual().catch(() => null),
     ]).then(([cats, meths, cds, pds, current]) => {
       setCategories(cats)
       setMethods(meths)

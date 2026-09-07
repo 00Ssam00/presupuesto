@@ -7,9 +7,9 @@ import FormField from '../../components/ui/FormField'
 import Badge from '../../components/ui/Badge'
 import Skeleton from '../../components/ui/Skeleton'
 import {
-  createCategory, updateCategory, deleteCategory,
-  createCard, updateCard, deleteCard,
-  createPeriod, deletePeriod,
+  crearCategoria, actualizarCategoria, eliminarCategoria,
+  crearTarjeta, actualizarTarjeta, eliminarTarjeta,
+  crearPeriodo, eliminarPeriodo,
 } from '../../lib/api'
 import { useReferenceData } from '../../lib/ReferenceDataContext'
 import { formatDate } from '../../lib/utils'
@@ -32,23 +32,23 @@ export default function Settings() {
 
   async function saveCat(e: React.FormEvent) {
     e.preventDefault()
-    if (editingCat) { await updateCategory(editingCat.id, catForm) }
-    else { await createCategory(catForm) }
+    if (editingCat) { await actualizarCategoria(editingCat.id, catForm) }
+    else { await crearCategoria(catForm) }
     setCatModal(false)
     refresh()
   }
 
   async function saveCard(e: React.FormEvent) {
     e.preventDefault()
-    if (editingCard) { await updateCard(editingCard.id, cardForm) }
-    else { await createCard(cardForm) }
+    if (editingCard) { await actualizarTarjeta(editingCard.id, cardForm) }
+    else { await crearTarjeta(cardForm) }
     setCardModal(false)
     refresh()
   }
 
   async function savePeriod(e: React.FormEvent) {
     e.preventDefault()
-    await createPeriod({ ...periodForm, ingreso_base: parseFloat(periodForm.ingreso_base) })
+    await crearPeriodo({ ...periodForm, ingreso_base: parseFloat(periodForm.ingreso_base) })
     setPeriodModal(false)
     refresh()
   }
@@ -79,7 +79,7 @@ export default function Settings() {
                   }}>Editar</Button>
                   <Button variant="ghost" size="sm" onClick={async () => {
                     if (!confirm('¿Desactivar?')) return
-                    await deleteCategory(c.id)
+                    await eliminarCategoria(c.id)
                     refresh()
                   }}>✕</Button>
                 </div>
@@ -110,7 +110,7 @@ export default function Settings() {
                   }}>Editar</Button>
                   <Button variant="ghost" size="sm" onClick={async () => {
                     if (!confirm('¿Desactivar?')) return
-                    await deleteCard(c.id)
+                    await eliminarTarjeta(c.id)
                     refresh()
                   }}>✕</Button>
                 </div>
@@ -136,7 +136,7 @@ export default function Settings() {
                 {p.esta_cerrado && <Badge variant="warning">Cerrada</Badge>}
                 <Button variant="ghost" size="sm" onClick={async () => {
                   if (!confirm('¿Eliminar quincena?')) return
-                  await deletePeriod(p.id)
+                  await eliminarPeriodo(p.id)
                   refresh()
                 }}>✕</Button>
               </div>

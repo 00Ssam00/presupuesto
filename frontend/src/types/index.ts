@@ -61,36 +61,21 @@ export interface Presupuesto {
   gastado?: number
 }
 
-// Goal y UpcomingPayment siguen en inglés: todavía los sirve el backend Node
-// (Fase 7 de la migración, pendiente), no el backend .NET ya traducido.
-export interface Goal {
+// Meta y PagoProximo: Fase 7 de la migración — ya viven en el backend .NET,
+// directamente en español (no hubo versión en inglés que traducir).
+export interface Meta {
   id: string
-  name: string
-  type: 'savings' | 'investment'
-  target_amount: number
-  current_amount: number
-  deadline: string | null
-  is_active: boolean
+  nombre: string
+  tipo: 'savings' | 'investment'
+  monto_objetivo: number
+  monto_actual: number
+  fecha_limite: string | null
+  esta_activo: boolean
 }
 
-export interface UpcomingPayment {
-  id: string
-  period_id: string | null
-  category_id: string
-  name: string
-  amount: number
-  due_date: string
-  status: 'pending' | 'paid' | 'overdue'
-  is_recurring: boolean
-  recurrence_interval: 'weekly' | 'biweekly' | 'monthly' | null
-  category_name?: string
-  category_color?: string
-}
-
-// Forma en español de un pago próximo tal como lo anida /api/panel/{id} (ya
-// migrado a .NET) — distinta de UpcomingPayment de arriba, que sigue siendo la
-// forma en inglés del CRUD independiente que todavía sirve Node.
-export interface PagoProximoPanel {
+// Misma forma tanto para el pago próximo anidado en /api/panel/{id} como
+// para el recurso independiente /api/pagos-proximos.
+export interface PagoProximo {
   id: string
   periodo_id: string | null
   categoria_id: string
@@ -117,5 +102,5 @@ export interface DatosPanel {
     total: number
     presupuesto: number
   }>
-  pagos_proximos: PagoProximoPanel[]
+  pagos_proximos: PagoProximo[]
 }

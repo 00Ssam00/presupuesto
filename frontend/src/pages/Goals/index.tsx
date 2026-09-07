@@ -6,60 +6,65 @@ import Button from '../../components/ui/Button'
 import Modal from '../../components/ui/Modal'
 import FormField from '../../components/ui/FormField'
 import Skeleton from '../../components/ui/Skeleton'
-import { getGoals, createGoal, updateGoal, deleteGoal } from '../../lib/api'
+import { obtenerMetas, crearMeta, actualizarMeta, eliminarMeta } from '../../lib/api'
 import { formatCOP, pct, clamp } from '../../lib/utils'
-import type { Goal } from '../../types'
+import type { Meta } from '../../types'
 import styles from './Goals.module.css'
 
-const EMPTY = { name: '', type: 'savings' as 'savings' | 'investment', target_amount: '', current_amount: '', deadline: '' }
+const EMPTY = { nombre: '', tipo: 'savings' as 'savings' | 'investment', monto_objetivo: '', monto_actual: '', fecha_limite: '' }
 
 export default function Goals() {
-  const [goals, setGoals] = useState<Goal[]>([])
+  const [goals, setGoals] = useState<Meta[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
-  const [editing, setEditing] = useState<Goal | null>(null)
+  const [editing, setEditing] = useState<Meta | null>(null)
   const [form, setForm] = useState({ ...EMPTY })
 
-  useEffect(() => { getGoals().then(setGoals).finally(() => setLoading(false)) }, [])
+  useEffect(() => { obtenerMetas().then(setGoals).finally(() => setLoading(false)) }, [])
 
   function openNew() { setEditing(null); setForm({ ...EMPTY }); setModalOpen(true) }
-  function openEdit(g: Goal) {
+  function openEdit(g: Meta) {
     setEditing(g)
     setForm({
-      name: g.name, type: g.type,
-      target_amount: String(g.target_amount),
-      current_amount: String(g.current_amount),
-      deadline: g.deadline?.split('T')[0] || '',
+      nombre: g.nombre, tipo: g.tipo,
+      monto_objetivo: String(g.monto_objetivo),
+      monto_actual: String(g.monto_actual),
+      fecha_limite: g.fecha_limite?.split('T')[0] || '',
     })
     setModalOpen(true)
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const payload = { ...form, target_amount: parseFloat(form.target_amount), current_amount: parseFloat(form.current_amount || '0'), deadline: form.deadline || null }
-    if (editing) { await updateGoal(editing.id, payload) }
-    else { await createGoal(payload) }
+    const payload = {
+      ...form,
+      monto_objetivo: parseFloat(form.monto_objetivo),
+      monto_actual: parseFloat(form.monto_actual || '0'),
+      fecha_limite: form.fecha_limite || null,
+    }
+    if (editing) { await actualizarMeta(editing.id, payload) }
+    else { await crearMeta(payload) }
     setModalOpen(false)
-    getGoals().then(setGoals)
+    obtenerMetas().then(setGoals)
   }
 
   async function handleDelete(id: string) {
     if (!confirm('¿Eliminar esta meta?')) return
-    await deleteGoal(id)
+    await eliminarMeta(id)
     setGoals(prev => prev.filter(g => g.id !== id))
   }
 
-  const savings    = goals.filter(g => g.type === 'savings')
-  const investment = goals.filter(g => g.type === 'investment')
+  const savings    = goals.filter(g => g.tipo === 'savings')
+  const investment = goals.filter(g => g.tipo === 'investment')
 
-  function GoalCard({ g }: { g: Goal }) {
-    const progress = clamp(pct(Number(g.current_amount), Number(g.target_amount)), 0, 100)
+  function GoalCard({ g }: { g: Meta }) {
+    const progress = clamp(pct(Number(g.monto_actual), Number(g.monto_objetivo)), 0, 100)
     return (
       <Card className={styles.goalCard}>
         <div className={styles.goalTop}>
           <div>
-            <div className={styles.goalName}>{g.name}</div>
-            {g.deadline && <div className={styles.deadline}>Meta: {g.deadline.split('T')[0]}</div>}
+            <div className={styles.goalName}>{g.nombre}</div>
+            {g.fecha_limite && <div className={styles.deadline}>Meta: {g.fecha_limite.split('T')[0]}</div>}
           </div>
           <div className={styles.goalActions}>
             <Button variant="ghost" size="sm" onClick={() => openEdit(g)}>Editar</Button>
@@ -67,22 +72,22 @@ export default function Goals() {
           </div>
         </div>
         <div className={styles.goalAmounts}>
-          <span className={styles.current}>{formatCOP(Number(g.current_amount))}</span>
-          <span className={styles.muted}> de {formatCOP(Number(g.target_amount))}</span>
+          <span className={styles.current}>{formatCOP(Number(g.monto_actual))}</span>
+          <span className={styles.muted}> de {formatCOP(Number(g.monto_objetivo))}</span>
         </div>
         <div className={styles.progressBar}>
           <div
             className={styles.progressFill}
             style={{
               width: `${progress}%`,
-              background: g.type === 'savings' ? 'var(--color-success)' : 'var(--color-primary)',
+              background: g.tipo === 'savings' ? 'var(--color-success)' : 'var(--color-primary)',
             }}
           />
         </div>
         <div className={styles.goalBottom}>
           <span className={styles.muted}>{progress}% completado</span>
           <Badge variant={progress >= 100 ? 'success' : 'default'}>
-            {progress >= 100 ? 'Completada' : `Faltan ${formatCOP(Number(g.target_amount) - Number(g.current_amount))}`}
+            {progress >= 100 ? 'Completada' : `Faltan ${formatCOP(Number(g.monto_objetivo) - Number(g.monto_actual))}`}
           </Badge>
         </div>
       </Card>
@@ -120,24 +125,24 @@ export default function Goals() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar meta' : 'Nueva meta'}>
         <form onSubmit={handleSubmit} className={styles.form}>
           <FormField label="Nombre">
-            <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+            <input type="text" value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} required />
           </FormField>
           <FormField label="Tipo">
-            <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as 'savings' | 'investment' }))}>
+            <select value={form.tipo} onChange={e => setForm(f => ({ ...f, tipo: e.target.value as 'savings' | 'investment' }))}>
               <option value="savings">Ahorro</option>
               <option value="investment">Inversión</option>
             </select>
           </FormField>
           <div className={styles.row}>
             <FormField label="Meta">
-              <input type="number" min="0" value={form.target_amount} onChange={e => setForm(f => ({ ...f, target_amount: e.target.value }))} required />
+              <input type="number" min="0" value={form.monto_objetivo} onChange={e => setForm(f => ({ ...f, monto_objetivo: e.target.value }))} required />
             </FormField>
             <FormField label="Actual">
-              <input type="number" min="0" value={form.current_amount} onChange={e => setForm(f => ({ ...f, current_amount: e.target.value }))} />
+              <input type="number" min="0" value={form.monto_actual} onChange={e => setForm(f => ({ ...f, monto_actual: e.target.value }))} />
             </FormField>
           </div>
           <FormField label="Fecha límite (opcional)">
-            <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} />
+            <input type="date" value={form.fecha_limite} onChange={e => setForm(f => ({ ...f, fecha_limite: e.target.value }))} />
           </FormField>
           <div className={styles.formActions}>
             <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>

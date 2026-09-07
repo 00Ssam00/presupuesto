@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Header from '../../components/layout/Header'
 import Card from '../../components/ui/Card'
 import Skeleton from '../../components/ui/Skeleton'
-import { getBudgets, upsertBudget } from '../../lib/api'
+import { obtenerPresupuestos, guardarPresupuesto } from '../../lib/api'
 import { useReferenceData } from '../../lib/ReferenceDataContext'
 import { formatCOP, pct, clamp } from '../../lib/utils'
 import type { Presupuesto } from '../../types'
@@ -28,7 +28,7 @@ export default function Budget() {
     if (!selectedId) return
     let cancelled = false
     setBudgetsLoading(true)
-    getBudgets(selectedId).then(data => {
+    obtenerPresupuestos(selectedId).then(data => {
       if (!cancelled) { setBudgets(data); setBudgetsLoading(false) }
     })
     return () => { cancelled = true }
@@ -36,8 +36,8 @@ export default function Budget() {
 
   async function handleSave(b: Presupuesto) {
     const newAmount = parseFloat(editing[b.categoria_id] || String(b.monto))
-    await upsertBudget({ periodo_id: selectedId, categoria_id: b.categoria_id, monto: newAmount })
-    getBudgets(selectedId).then(setBudgets)
+    await guardarPresupuesto({ periodo_id: selectedId, categoria_id: b.categoria_id, monto: newAmount })
+    obtenerPresupuestos(selectedId).then(setBudgets)
     setEditing(e => { const n = { ...e }; delete n[b.categoria_id]; return n })
   }
 

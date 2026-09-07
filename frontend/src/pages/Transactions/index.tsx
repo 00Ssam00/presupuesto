@@ -6,7 +6,7 @@ import Button from '../../components/ui/Button'
 import Modal from '../../components/ui/Modal'
 import FormField from '../../components/ui/FormField'
 import Skeleton from '../../components/ui/Skeleton'
-import { getTransactions, createTransaction, updateTransaction, deleteTransaction } from '../../lib/api'
+import { obtenerTransacciones, crearTransaccion, actualizarTransaccion, eliminarTransaccion } from '../../lib/api'
 import { useReferenceData } from '../../lib/ReferenceDataContext'
 import { formatCOP, formatDate, todayISO } from '../../lib/utils'
 import type { Transaccion } from '../../types'
@@ -47,7 +47,7 @@ export default function Transactions() {
     const params: Record<string, string> = {}
     if (filterPeriod) params.periodo_id = filterPeriod
     if (filterType)   params.tipo       = filterType
-    getTransactions(params).then(data => {
+    obtenerTransacciones(params).then(data => {
       if (!cancelled) { setTransactions(data); setTxLoading(false) }
     })
     return () => { cancelled = true }
@@ -85,20 +85,20 @@ export default function Transactions() {
       tarjeta_id: requiresCard ? form.tarjeta_id : null,
     }
     if (editing) {
-      await updateTransaction(editing.id, payload)
+      await actualizarTransaccion(editing.id, payload)
     } else {
-      await createTransaction(payload)
+      await crearTransaccion(payload)
     }
     setModalOpen(false)
     const params: Record<string, string> = {}
     if (filterPeriod) params.periodo_id = filterPeriod
     if (filterType)   params.tipo       = filterType
-    getTransactions(params).then(setTransactions)
+    obtenerTransacciones(params).then(setTransactions)
   }
 
   async function handleDelete(id: string) {
     if (!confirm('¿Eliminar esta transacción?')) return
-    await deleteTransaction(id)
+    await eliminarTransaccion(id)
     setTransactions(prev => prev.filter(t => t.id !== id))
   }
 

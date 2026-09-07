@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { createTestPeriod, deletePeriod, getPeriod, getCurrentPeriod, type TestPeriod } from './helpers/api'
+import { createTestPeriod, deletePeriod, getPeriod, type TestPeriod } from './helpers/api'
 
 let period: TestPeriod
 
@@ -43,14 +43,25 @@ test.describe('Dashboard', () => {
   })
 
   test('la fecha del gasto rápido usa la fecha real de hoy cuando cae dentro de la quincena actual', async ({ page }) => {
-    const current = await getCurrentPeriod()
-
-    await page.goto('/dashboard')
-    await page.locator('select').first().selectOption({ label: current.etiqueta })
-
-    await page.getByRole('button', { name: '+ Agregar gasto' }).click()
+    // Se crea una quincena propia que cubre hoy en vez de depender de que ya
+    // exista una en la base (los tests de integración de .NET asumen la
+    // tabla periods vacía, así que no se puede sembrar una de forma permanente).
     const today = new Date().toISOString().slice(0, 10)
-    await expect(page.getByLabel('Fecha')).toHaveValue(today)
+    const todayPeriod = await createTestPeriod({
+      etiqueta: 'E2E Dashboard Hoy',
+      fecha_inicio: new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10),
+      fecha_fin: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10),
+    })
+
+    try {
+      await page.goto('/dashboard')
+      await page.locator('select').first().selectOption({ label: todayPeriod.etiqueta })
+
+      await page.getByRole('button', { name: '+ Agregar gasto' }).click()
+      await expect(page.getByLabel('Fecha')).toHaveValue(today)
+    } finally {
+      await deletePeriod(todayPeriod.id)
+    }
   })
 
   test('agregar un gasto rápido actualiza los gastos totales', async ({ page }) => {

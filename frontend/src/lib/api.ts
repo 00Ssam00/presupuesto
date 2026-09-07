@@ -2,7 +2,7 @@ import axios from 'axios'
 import { showToast } from './toast'
 import type {
   Periodo, Transaccion, Categoria, Presupuesto,
-  Goal, UpcomingPayment, Tarjeta, MetodoPago, DatosPanel
+  Meta, PagoProximo, Tarjeta, MetodoPago, DatosPanel
 } from '../types'
 
 const api = axios.create({
@@ -40,24 +40,24 @@ api.interceptors.response.use(
 )
 
 // Dashboard
-export const getDashboard = (periodId: string) =>
+export const obtenerPanel = (periodId: string) =>
   api.get<DatosPanel>(`/panel/${periodId}`).then(r => r.data)
 
 // Periods
-export const getPeriods        = ()   => api.get<Periodo[]>('/periodos').then(r => r.data)
-export const getCurrentPeriod  = ()   => api.get<Periodo>('/periodos/actual').then(r => r.data)
-export const createPeriod      = (d: Partial<Periodo>) => api.post<Periodo>('/periodos', d).then(r => r.data)
-export const updatePeriod      = (id: string, d: Partial<Periodo>) => api.put<Periodo>(`/periodos/${id}`, d).then(r => r.data)
-export const deletePeriod      = (id: string) => api.delete(`/periodos/${id}`)
+export const obtenerPeriodos        = ()   => api.get<Periodo[]>('/periodos').then(r => r.data)
+export const obtenerPeriodoActual  = ()   => api.get<Periodo>('/periodos/actual').then(r => r.data)
+export const crearPeriodo      = (d: Partial<Periodo>) => api.post<Periodo>('/periodos', d).then(r => r.data)
+export const actualizarPeriodo      = (id: string, d: Partial<Periodo>) => api.put<Periodo>(`/periodos/${id}`, d).then(r => r.data)
+export const eliminarPeriodo      = (id: string) => api.delete(`/periodos/${id}`)
 
 // Transactions
-export const getTransactions = (params?: Record<string, string>) =>
+export const obtenerTransacciones = (params?: Record<string, string>) =>
   api.get<Transaccion[]>('/transacciones', { params }).then(r => r.data)
-export const createTransaction = (d: Partial<Transaccion>) => api.post<Transaccion>('/transacciones', d).then(r => r.data)
-export const updateTransaction = (id: string, d: Partial<Transaccion>) => api.put<Transaccion>(`/transacciones/${id}`, d).then(r => r.data)
-export const deleteTransaction = (id: string) => api.delete(`/transacciones/${id}`)
+export const crearTransaccion = (d: Partial<Transaccion>) => api.post<Transaccion>('/transacciones', d).then(r => r.data)
+export const actualizarTransaccion = (id: string, d: Partial<Transaccion>) => api.put<Transaccion>(`/transacciones/${id}`, d).then(r => r.data)
+export const eliminarTransaccion = (id: string) => api.delete(`/transacciones/${id}`)
 
-export interface ImportRow {
+export interface FilaImportacion {
   monto?: string
   tipo?: string
   fecha?: string
@@ -66,53 +66,53 @@ export interface ImportRow {
   tarjeta?: string
   descripcion?: string
 }
-export interface ImportRowResult {
+export interface ResultadoFilaImportacion {
   fila: number
   estado: 'created' | 'error'
   id?: string
   error?: string
 }
-export interface ImportResponse {
+export interface RespuestaImportacion {
   creados: number
   fallidos: number
-  resultados: ImportRowResult[]
+  resultados: ResultadoFilaImportacion[]
 }
-export const importTransactions = (rows: ImportRow[]) =>
-  api.post<ImportResponse>('/transacciones/importar', { filas: rows }).then(r => r.data)
+export const importarTransacciones = (rows: FilaImportacion[]) =>
+  api.post<RespuestaImportacion>('/transacciones/importar', { filas: rows }).then(r => r.data)
 
 // Categories
-export const getCategories    = () => api.get<Categoria[]>('/categorias').then(r => r.data)
-export const createCategory   = (d: Partial<Categoria>) => api.post<Categoria>('/categorias', d).then(r => r.data)
-export const updateCategory   = (id: string, d: Partial<Categoria>) => api.put<Categoria>(`/categorias/${id}`, d).then(r => r.data)
-export const deleteCategory   = (id: string) => api.delete(`/categorias/${id}`)
+export const obtenerCategorias    = () => api.get<Categoria[]>('/categorias').then(r => r.data)
+export const crearCategoria   = (d: Partial<Categoria>) => api.post<Categoria>('/categorias', d).then(r => r.data)
+export const actualizarCategoria   = (id: string, d: Partial<Categoria>) => api.put<Categoria>(`/categorias/${id}`, d).then(r => r.data)
+export const eliminarCategoria   = (id: string) => api.delete(`/categorias/${id}`)
 
 // Budgets
-export const getBudgets    = (periodId: string) => api.get<Presupuesto[]>(`/presupuestos/periodo/${periodId}`).then(r => r.data)
-export const upsertBudget  = (d: Partial<Presupuesto>) => api.post<Presupuesto>('/presupuestos', d).then(r => r.data)
-export const deleteBudget  = (id: string) => api.delete(`/presupuestos/${id}`)
+export const obtenerPresupuestos    = (periodId: string) => api.get<Presupuesto[]>(`/presupuestos/periodo/${periodId}`).then(r => r.data)
+export const guardarPresupuesto  = (d: Partial<Presupuesto>) => api.post<Presupuesto>('/presupuestos', d).then(r => r.data)
+export const eliminarPresupuesto  = (id: string) => api.delete(`/presupuestos/${id}`)
 
-// Goals
-export const getGoals    = () => api.get<Goal[]>('/goals').then(r => r.data)
-export const createGoal  = (d: Partial<Goal>) => api.post<Goal>('/goals', d).then(r => r.data)
-export const updateGoal  = (id: string, d: Partial<Goal>) => api.put<Goal>(`/goals/${id}`, d).then(r => r.data)
-export const deleteGoal  = (id: string) => api.delete(`/goals/${id}`)
+// Goals (Fase 7 — ya en .NET, rutas y campos en español)
+export const obtenerMetas    = () => api.get<Meta[]>('/metas').then(r => r.data)
+export const crearMeta  = (d: Partial<Meta>) => api.post<Meta>('/metas', d).then(r => r.data)
+export const actualizarMeta  = (id: string, d: Partial<Meta>) => api.put<Meta>(`/metas/${id}`, d).then(r => r.data)
+export const eliminarMeta  = (id: string) => api.delete(`/metas/${id}`)
 
-// Upcoming payments
-export const getUpcomingPayments    = (params?: Record<string, string>) =>
-  api.get<UpcomingPayment[]>('/upcoming-payments', { params }).then(r => r.data)
-export const createUpcomingPayment  = (d: Partial<UpcomingPayment>) => api.post<UpcomingPayment>('/upcoming-payments', d).then(r => r.data)
-export const updateUpcomingPayment  = (id: string, d: Partial<UpcomingPayment>) => api.put<UpcomingPayment>(`/upcoming-payments/${id}`, d).then(r => r.data)
-export const deleteUpcomingPayment  = (id: string) => api.delete(`/upcoming-payments/${id}`)
+// Upcoming payments (Fase 7 — ya en .NET, rutas y campos en español)
+export const obtenerPagosProximos    = (params?: Record<string, string>) =>
+  api.get<PagoProximo[]>('/pagos-proximos', { params }).then(r => r.data)
+export const crearPagoProximo  = (d: Partial<PagoProximo>) => api.post<PagoProximo>('/pagos-proximos', d).then(r => r.data)
+export const actualizarPagoProximo  = (id: string, d: Partial<PagoProximo>) => api.put<PagoProximo>(`/pagos-proximos/${id}`, d).then(r => r.data)
+export const eliminarPagoProximo  = (id: string) => api.delete(`/pagos-proximos/${id}`)
 
 // Cards
-export const getCards    = () => api.get<Tarjeta[]>('/tarjetas').then(r => r.data)
-export const createCard  = (d: Partial<Tarjeta>) => api.post<Tarjeta>('/tarjetas', d).then(r => r.data)
-export const updateCard  = (id: string, d: Partial<Tarjeta>) => api.put<Tarjeta>(`/tarjetas/${id}`, d).then(r => r.data)
-export const deleteCard  = (id: string) => api.delete(`/tarjetas/${id}`)
+export const obtenerTarjetas    = () => api.get<Tarjeta[]>('/tarjetas').then(r => r.data)
+export const crearTarjeta  = (d: Partial<Tarjeta>) => api.post<Tarjeta>('/tarjetas', d).then(r => r.data)
+export const actualizarTarjeta  = (id: string, d: Partial<Tarjeta>) => api.put<Tarjeta>(`/tarjetas/${id}`, d).then(r => r.data)
+export const eliminarTarjeta  = (id: string) => api.delete(`/tarjetas/${id}`)
 
 // Payment methods
-export const getPaymentMethods = () => api.get<MetodoPago[]>('/metodos-pago').then(r => r.data)
+export const obtenerMetodosPago = () => api.get<MetodoPago[]>('/metodos-pago').then(r => r.data)
 
-// Settings
-export const getSettings    = () => api.get<Record<string, string>>('/settings').then(r => r.data)
-export const updateSetting  = (key: string, value: string) => api.put(`/settings/${key}`, { value })
+// Settings (Fase 7 — ya en .NET, rutas y campos en español)
+export const obtenerAjustes    = () => api.get<Record<string, string>>('/ajustes').then(r => r.data)
+export const actualizarAjuste  = (key: string, value: string) => api.put(`/ajustes/${key}`, { valor: value })

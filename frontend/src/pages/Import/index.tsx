@@ -3,10 +3,10 @@ import Header from '../../components/layout/Header'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import FormField from '../../components/ui/FormField'
-import { importTransactions, getTransactions } from '../../lib/api'
+import { importarTransacciones, obtenerTransacciones } from '../../lib/api'
 import { useReferenceData } from '../../lib/ReferenceDataContext'
 import { parseCsvLine, csvEscapeField } from '../../lib/utils'
-import type { ImportResponse } from '../../lib/api'
+import type { RespuestaImportacion } from '../../lib/api'
 import type { Transaccion } from '../../types'
 import styles from './Import.module.css'
 
@@ -26,7 +26,7 @@ export default function ImportExport() {
   const [rows, setRows] = useState<CsvRow[]>([])
   const [parseError, setParseError] = useState('')
   const [importing, setImporting] = useState(false)
-  const [importResult, setImportResult] = useState<ImportResponse | null>(null)
+  const [importResult, setImportResult] = useState<RespuestaImportacion | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [exportPeriodId, setExportPeriodId] = useState('')
@@ -72,7 +72,7 @@ export default function ImportExport() {
     setImporting(true)
     setImportResult(null)
     try {
-      const result = await importTransactions(rows)
+      const result = await importarTransacciones(rows)
       setImportResult(result)
       if (result.creados > 0) {
         setRows([])
@@ -102,7 +102,7 @@ export default function ImportExport() {
     setExporting(true)
     try {
       const params = exportPeriodId ? { periodo_id: exportPeriodId } : undefined
-      const transactions = await getTransactions(params)
+      const transactions = await obtenerTransacciones(params)
       const header = ['monto', 'tipo', 'fecha', 'categoria', 'metodo', 'tarjeta', 'descripcion']
       const lines = [header.join(',')]
       transactions.forEach((t: Transaccion) => {

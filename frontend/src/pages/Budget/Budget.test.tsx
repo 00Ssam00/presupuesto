@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Budget from './index'
-import { getBudgets, upsertBudget } from '../../lib/api'
+import { obtenerPresupuestos, guardarPresupuesto } from '../../lib/api'
 import { useReferenceData } from '../../lib/ReferenceDataContext'
 
 vi.mock('../../lib/api')
@@ -26,7 +26,7 @@ beforeEach(() => {
 
 describe('Budget', () => {
   it('muestra las categorías sin presupuesto asignado con monto en 0, listas para editar', async () => {
-    vi.mocked(getBudgets).mockResolvedValue([
+    vi.mocked(obtenerPresupuestos).mockResolvedValue([
       { id: 'b1', periodo_id: 'p1', categoria_id: 'c1', monto: 50000, porcentaje: null, nombre_categoria: 'Alimentación', color_categoria: '#000', gastado: 20000 },
       { id: null, periodo_id: 'p1', categoria_id: 'c2', monto: 0, porcentaje: null, nombre_categoria: 'Transporte', color_categoria: '#111', gastado: 0 },
     ])
@@ -41,10 +41,10 @@ describe('Budget', () => {
   })
 
   it('asigna presupuesto a una categoría sin fila existente (upsert por categoria_id)', async () => {
-    vi.mocked(getBudgets).mockResolvedValue([
+    vi.mocked(obtenerPresupuestos).mockResolvedValue([
       { id: null, periodo_id: 'p1', categoria_id: 'c2', monto: 0, porcentaje: null, nombre_categoria: 'Transporte', color_categoria: '#111', gastado: 0 },
     ])
-    vi.mocked(upsertBudget).mockResolvedValue({ id: 'new-b', periodo_id: 'p1', categoria_id: 'c2', monto: 80000, porcentaje: null })
+    vi.mocked(guardarPresupuesto).mockResolvedValue({ id: 'new-b', periodo_id: 'p1', categoria_id: 'c2', monto: 80000, porcentaje: null })
 
     render(<Budget />)
     await waitFor(() => expect(screen.getByText('Transporte')).toBeInTheDocument())
@@ -55,7 +55,7 @@ describe('Budget', () => {
     await userEvent.tab()
 
     await waitFor(() => {
-      expect(upsertBudget).toHaveBeenCalledWith({ periodo_id: 'p1', categoria_id: 'c2', monto: 80000 })
+      expect(guardarPresupuesto).toHaveBeenCalledWith({ periodo_id: 'p1', categoria_id: 'c2', monto: 80000 })
     })
   })
 })
