@@ -23,13 +23,13 @@ namespace Quincena.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pgcrypto");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Quincena.Domain.Entities.AppSetting", b =>
+            modelBuilder.Entity("Quincena.Domain.Entidades.AppSetting", b =>
                 {
                     b.Property<string>("Key")
                         .HasColumnType("text")
                         .HasColumnName("key");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime>("ActualizadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at")
@@ -45,90 +45,7 @@ namespace Quincena.Infrastructure.Migrations
                     b.ToTable("app_settings", (string)null);
                 });
 
-            modelBuilder.Entity("Quincena.Domain.Entities.Budget", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<decimal>("Amount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(12,2)")
-                        .HasDefaultValue(0m)
-                        .HasColumnName("amount");
-
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("category_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<decimal?>("Percentage")
-                        .HasColumnType("numeric(5,2)")
-                        .HasColumnName("percentage");
-
-                    b.Property<Guid>("PeriodId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("period_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("PeriodId")
-                        .HasDatabaseName("idx_budgets_period");
-
-                    b.HasIndex("PeriodId", "CategoryId")
-                        .IsUnique();
-
-                    b.ToTable("budgets", (string)null);
-                });
-
-            modelBuilder.Entity("Quincena.Domain.Entities.Card", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("Bank")
-                        .HasColumnType("text")
-                        .HasColumnName("bank");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("LastFour")
-                        .HasColumnType("char(4)")
-                        .HasColumnName("last_four");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("cards", (string)null);
-                });
-
-            modelBuilder.Entity("Quincena.Domain.Entities.Category", b =>
+            modelBuilder.Entity("Quincena.Domain.Entidades.Categoria", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -143,28 +60,28 @@ namespace Quincena.Infrastructure.Migrations
                         .HasDefaultValue("#01696f")
                         .HasColumnName("color");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("CreadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<string>("Icon")
-                        .HasColumnType("text")
-                        .HasColumnName("icon");
-
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("EstaActivo")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("is_active");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Icono")
+                        .HasColumnType("text")
+                        .HasColumnName("icon");
+
+                    b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<int>("SortOrder")
+                    b.Property<int>("Orden")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
@@ -175,7 +92,7 @@ namespace Quincena.Infrastructure.Migrations
                     b.ToTable("categories", (string)null);
                 });
 
-            modelBuilder.Entity("Quincena.Domain.Entities.Goal", b =>
+            modelBuilder.Entity("Quincena.Domain.Entidades.Goal", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -183,7 +100,13 @@ namespace Quincena.Infrastructure.Migrations
                         .HasColumnName("id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("ActualizadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<DateTime>("CreadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at")
@@ -199,13 +122,13 @@ namespace Quincena.Infrastructure.Migrations
                         .HasColumnType("date")
                         .HasColumnName("deadline");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("EstaActivo")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("is_active");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
@@ -214,16 +137,10 @@ namespace Quincena.Infrastructure.Migrations
                         .HasColumnType("numeric(12,2)")
                         .HasColumnName("target_amount");
 
-                    b.Property<string>("Type")
+                    b.Property<string>("Tipo")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("type");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("NOW()");
 
                     b.HasKey("Id");
 
@@ -233,7 +150,7 @@ namespace Quincena.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Quincena.Domain.Entities.PaymentMethod", b =>
+            modelBuilder.Entity("Quincena.Domain.Entidades.MetodoPago", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -241,18 +158,18 @@ namespace Quincena.Infrastructure.Migrations
                         .HasColumnName("id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("EstaActivo")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("is_active");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<bool>("RequiresCard")
+                    b.Property<bool>("RequiereTarjeta")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
@@ -263,7 +180,7 @@ namespace Quincena.Infrastructure.Migrations
                     b.ToTable("payment_methods", (string)null);
                 });
 
-            modelBuilder.Entity("Quincena.Domain.Entities.Period", b =>
+            modelBuilder.Entity("Quincena.Domain.Entidades.PagoProximo", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -271,193 +188,58 @@ namespace Quincena.Infrastructure.Migrations
                         .HasColumnName("id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<decimal>("BaseIncome")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(12,2)")
-                        .HasDefaultValue(0m)
-                        .HasColumnName("base_income");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<DateOnly>("EndDate")
-                        .HasColumnType("date")
-                        .HasColumnName("end_date");
-
-                    b.Property<bool>("IsClosed")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_closed");
-
-                    b.Property<string>("Label")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("label");
-
-                    b.Property<decimal>("Rollover")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(12,2)")
-                        .HasDefaultValue(0m)
-                        .HasColumnName("rollover");
-
-                    b.Property<DateOnly>("StartDate")
-                        .HasColumnType("date")
-                        .HasColumnName("start_date");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("periods", null, t =>
-                        {
-                            t.HasCheckConstraint("periods_dates_check", "end_date > start_date");
-                        });
-                });
-
-            modelBuilder.Entity("Quincena.Domain.Entities.Transaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric(12,2)")
-                        .HasColumnName("amount");
-
-                    b.Property<Guid?>("CardId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("card_id");
-
-                    b.Property<Guid>("CategoryId")
+                    b.Property<Guid>("CategoriaId")
                         .HasColumnType("uuid")
                         .HasColumnName("category_id");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("CreadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<DateOnly>("Date")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("date")
-                        .HasColumnName("date")
-                        .HasDefaultValueSql("CURRENT_DATE");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("text")
-                        .HasColumnName("note");
-
-                    b.Property<Guid>("PaymentMethodId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("payment_method_id");
-
-                    b.Property<Guid>("PeriodId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("period_id");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("type");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CardId");
-
-                    b.HasIndex("CategoryId")
-                        .HasDatabaseName("idx_transactions_category");
-
-                    b.HasIndex("Date")
-                        .IsDescending()
-                        .HasDatabaseName("idx_transactions_date");
-
-                    b.HasIndex("PaymentMethodId");
-
-                    b.HasIndex("PeriodId")
-                        .HasDatabaseName("idx_transactions_period");
-
-                    b.ToTable("transactions", null, t =>
-                        {
-                            t.HasCheckConstraint("transactions_type_check", "type IN ('income', 'expense')");
-                        });
-                });
-
-            modelBuilder.Entity("Quincena.Domain.Entities.UpcomingPayment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric(12,2)")
-                        .HasColumnName("amount");
-
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("category_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<DateOnly>("DueDate")
-                        .HasColumnType("date")
-                        .HasColumnName("due_date");
-
-                    b.Property<bool>("IsRecurring")
+                    b.Property<bool>("EsRecurrente")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("is_recurring");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<Guid?>("PeriodId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("period_id");
-
-                    b.Property<string>("RecurrenceInterval")
-                        .HasColumnType("text")
-                        .HasColumnName("recurrence_interval");
-
-                    b.Property<string>("Status")
+                    b.Property<string>("Estado")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text")
                         .HasDefaultValue("pending")
                         .HasColumnName("status");
 
+                    b.Property<DateOnly>("FechaVencimiento")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
+
+                    b.Property<string>("IntervaloRecurrencia")
+                        .HasColumnType("text")
+                        .HasColumnName("recurrence_interval");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<Guid?>("PeriodoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("period_id");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("CategoriaId");
 
-                    b.HasIndex("DueDate")
+                    b.HasIndex("FechaVencimiento")
                         .HasDatabaseName("idx_upcoming_due");
 
-                    b.HasIndex("PeriodId");
+                    b.HasIndex("PeriodoId");
 
                     b.ToTable("upcoming_payments", null, t =>
                         {
@@ -467,59 +249,277 @@ namespace Quincena.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Quincena.Domain.Entities.Budget", b =>
+            modelBuilder.Entity("Quincena.Domain.Entidades.Periodo", b =>
                 {
-                    b.HasOne("Quincena.Domain.Entities.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.HasOne("Quincena.Domain.Entities.Period", null)
-                        .WithMany()
-                        .HasForeignKey("PeriodId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<decimal>("Arrastre")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("rollover");
+
+                    b.Property<DateTime>("CreadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<bool>("EstaCerrado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_closed");
+
+                    b.Property<string>("Etiqueta")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("label");
+
+                    b.Property<DateOnly>("FechaFin")
+                        .HasColumnType("date")
+                        .HasColumnName("end_date");
+
+                    b.Property<DateOnly>("FechaInicio")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.Property<decimal>("IngresoBase")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("base_income");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("periods", null, t =>
+                        {
+                            t.HasCheckConstraint("periods_dates_check", "end_date > start_date");
+                        });
                 });
 
-            modelBuilder.Entity("Quincena.Domain.Entities.Transaction", b =>
+            modelBuilder.Entity("Quincena.Domain.Entidades.Presupuesto", b =>
                 {
-                    b.HasOne("Quincena.Domain.Entities.Card", null)
-                        .WithMany()
-                        .HasForeignKey("CardId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.HasOne("Quincena.Domain.Entities.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Property<Guid>("CategoriaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("category_id");
 
-                    b.HasOne("Quincena.Domain.Entities.PaymentMethod", null)
-                        .WithMany()
-                        .HasForeignKey("PaymentMethodId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Property<DateTime>("CreadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
 
-                    b.HasOne("Quincena.Domain.Entities.Period", null)
-                        .WithMany()
-                        .HasForeignKey("PeriodId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<decimal>("Monto")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("PeriodoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("period_id");
+
+                    b.Property<decimal?>("Porcentaje")
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("percentage");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoriaId");
+
+                    b.HasIndex("PeriodoId")
+                        .HasDatabaseName("idx_budgets_period");
+
+                    b.HasIndex("PeriodoId", "CategoriaId")
+                        .IsUnique();
+
+                    b.ToTable("budgets", (string)null);
                 });
 
-            modelBuilder.Entity("Quincena.Domain.Entities.UpcomingPayment", b =>
+            modelBuilder.Entity("Quincena.Domain.Entidades.Tarjeta", b =>
                 {
-                    b.HasOne("Quincena.Domain.Entities.Category", null)
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Banco")
+                        .HasColumnType("text")
+                        .HasColumnName("bank");
+
+                    b.Property<DateTime>("CreadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<bool>("EstaActivo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("UltimosCuatro")
+                        .HasColumnType("char(4)")
+                        .HasColumnName("last_four");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("cards", (string)null);
+                });
+
+            modelBuilder.Entity("Quincena.Domain.Entidades.Transaccion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("ActualizadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<Guid>("CategoriaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("category_id");
+
+                    b.Property<DateTime>("CreadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<DateOnly>("Fecha")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("date")
+                        .HasColumnName("date")
+                        .HasDefaultValueSql("CURRENT_DATE");
+
+                    b.Property<Guid>("MetodoPagoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payment_method_id");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("Nota")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("PeriodoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("period_id");
+
+                    b.Property<Guid?>("TarjetaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("card_id");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoriaId")
+                        .HasDatabaseName("idx_transactions_category");
+
+                    b.HasIndex("Fecha")
+                        .IsDescending()
+                        .HasDatabaseName("idx_transactions_date");
+
+                    b.HasIndex("MetodoPagoId");
+
+                    b.HasIndex("PeriodoId")
+                        .HasDatabaseName("idx_transactions_period");
+
+                    b.HasIndex("TarjetaId");
+
+                    b.ToTable("transactions", null, t =>
+                        {
+                            t.HasCheckConstraint("transactions_type_check", "type IN ('income', 'expense')");
+                        });
+                });
+
+            modelBuilder.Entity("Quincena.Domain.Entidades.PagoProximo", b =>
+                {
+                    b.HasOne("Quincena.Domain.Entidades.Categoria", null)
                         .WithMany()
-                        .HasForeignKey("CategoryId")
+                        .HasForeignKey("CategoriaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Quincena.Domain.Entities.Period", null)
+                    b.HasOne("Quincena.Domain.Entidades.Periodo", null)
                         .WithMany()
-                        .HasForeignKey("PeriodId")
+                        .HasForeignKey("PeriodoId")
                         .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("Quincena.Domain.Entidades.Presupuesto", b =>
+                {
+                    b.HasOne("Quincena.Domain.Entidades.Categoria", null)
+                        .WithMany()
+                        .HasForeignKey("CategoriaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Quincena.Domain.Entidades.Periodo", null)
+                        .WithMany()
+                        .HasForeignKey("PeriodoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Quincena.Domain.Entidades.Transaccion", b =>
+                {
+                    b.HasOne("Quincena.Domain.Entidades.Categoria", null)
+                        .WithMany()
+                        .HasForeignKey("CategoriaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Quincena.Domain.Entidades.MetodoPago", null)
+                        .WithMany()
+                        .HasForeignKey("MetodoPagoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Quincena.Domain.Entidades.Periodo", null)
+                        .WithMany()
+                        .HasForeignKey("PeriodoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Quincena.Domain.Entidades.Tarjeta", null)
+                        .WithMany()
+                        .HasForeignKey("TarjetaId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 #pragma warning restore 612, 618
         }

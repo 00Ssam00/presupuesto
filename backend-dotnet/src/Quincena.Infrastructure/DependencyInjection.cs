@@ -1,30 +1,30 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Quincena.Application.Budgets;
-using Quincena.Application.Cards;
-using Quincena.Application.Categories;
-using Quincena.Application.Dashboard;
-using Quincena.Application.PaymentMethods;
-using Quincena.Application.Periods;
-using Quincena.Application.Rollover;
-using Quincena.Application.Transactions;
-using Quincena.Infrastructure.Repositories;
+using Quincena.Application.Presupuestos;
+using Quincena.Application.Tarjetas;
+using Quincena.Application.Categorias;
+using Quincena.Application.Panel;
+using Quincena.Application.MetodosPago;
+using Quincena.Application.Periodos;
+using Quincena.Application.Arrastre;
+using Quincena.Application.Transacciones;
+using Quincena.Infrastructure.Repositorios;
 
 namespace Quincena.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AgregarInfraestructura(this IServiceCollection services, string connectionString)
     {
         services.AddDbContext<QuincenaDbContext>(options => options.UseNpgsql(connectionString));
-        services.AddScoped<IPeriodRepository, PeriodRepository>();
-        services.AddScoped<IRolloverDataSource, RolloverDataSource>();
-        services.AddScoped<ICategoryRepository, CategoryRepository>();
-        services.AddScoped<ICardRepository, CardRepository>();
-        services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
-        services.AddScoped<ITransactionRepository, TransactionRepository>();
-        services.AddScoped<IBudgetRepository, BudgetRepository>();
-        services.AddScoped<IDashboardRepository, DashboardRepository>();
+        services.AddScoped<IRepositorioPeriodos, RepositorioPeriodos>();
+        services.AddScoped<IFuenteDatosArrastre, FuenteDatosArrastre>();
+        services.AddScoped<IRepositorioCategorias, RepositorioCategorias>();
+        services.AddScoped<IRepositorioTarjetas, RepositorioTarjetas>();
+        services.AddScoped<IRepositorioMetodosPago, RepositorioMetodosPago>();
+        services.AddScoped<IRepositorioTransacciones, RepositorioTransacciones>();
+        services.AddScoped<IRepositorioPresupuestos, RepositorioPresupuestos>();
+        services.AddScoped<IRepositorioPanel, RepositorioPanel>();
         return services;
     }
 }

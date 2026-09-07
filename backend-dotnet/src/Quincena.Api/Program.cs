@@ -33,8 +33,8 @@ else
         ?? throw new InvalidOperationException("No hay DATABASE_URL ni ConnectionStrings:DefaultConnection configurados.");
 }
 
-builder.Services.AddInfrastructure(connectionString);
-builder.Services.AddApplication();
+builder.Services.AgregarInfraestructura(connectionString);
+builder.Services.AgregarAplicacion();
 
 // --- JSON: paridad byte a byte con las respuestas del backend Node actual ---
 builder.Services.AddControllers().AddJsonOptions(options =>

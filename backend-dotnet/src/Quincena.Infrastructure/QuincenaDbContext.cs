@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Quincena.Domain.Entities;
-using Quincena.Infrastructure.Configurations;
+using Quincena.Domain.Entidades;
+using Quincena.Infrastructure.Configuraciones;
 
 namespace Quincena.Infrastructure;
 
@@ -8,28 +8,28 @@ public class QuincenaDbContext : DbContext
 {
     public QuincenaDbContext(DbContextOptions<QuincenaDbContext> options) : base(options) { }
 
-    public DbSet<Category> Categories => Set<Category>();
-    public DbSet<PaymentMethod> PaymentMethods => Set<PaymentMethod>();
-    public DbSet<Card> Cards => Set<Card>();
-    public DbSet<Period> Periods => Set<Period>();
-    public DbSet<Budget> Budgets => Set<Budget>();
-    public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<Categoria> Categorias => Set<Categoria>();
+    public DbSet<MetodoPago> MetodosPago => Set<MetodoPago>();
+    public DbSet<Tarjeta> Tarjetas => Set<Tarjeta>();
+    public DbSet<Periodo> Periodos => Set<Periodo>();
+    public DbSet<Presupuesto> Presupuestos => Set<Presupuesto>();
+    public DbSet<Transaccion> Transacciones => Set<Transaccion>();
     public DbSet<Goal> Goals => Set<Goal>();
-    public DbSet<UpcomingPayment> UpcomingPayments => Set<UpcomingPayment>();
+    public DbSet<PagoProximo> PagosProximos => Set<PagoProximo>();
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("pgcrypto");
 
-        modelBuilder.ApplyConfiguration(new CategoryConfiguration());
-        modelBuilder.ApplyConfiguration(new PaymentMethodConfiguration());
-        modelBuilder.ApplyConfiguration(new CardConfiguration());
-        modelBuilder.ApplyConfiguration(new PeriodConfiguration());
-        modelBuilder.ApplyConfiguration(new BudgetConfiguration());
-        modelBuilder.ApplyConfiguration(new TransactionConfiguration());
+        modelBuilder.ApplyConfiguration(new ConfiguracionCategoria());
+        modelBuilder.ApplyConfiguration(new ConfiguracionMetodoPago());
+        modelBuilder.ApplyConfiguration(new ConfiguracionTarjeta());
+        modelBuilder.ApplyConfiguration(new ConfiguracionPeriodo());
+        modelBuilder.ApplyConfiguration(new ConfiguracionPresupuesto());
+        modelBuilder.ApplyConfiguration(new ConfiguracionTransaccion());
         modelBuilder.ApplyConfiguration(new GoalConfiguration());
-        modelBuilder.ApplyConfiguration(new UpcomingPaymentConfiguration());
+        modelBuilder.ApplyConfiguration(new ConfiguracionPagoProximo());
         modelBuilder.ApplyConfiguration(new AppSettingConfiguration());
     }
 }
