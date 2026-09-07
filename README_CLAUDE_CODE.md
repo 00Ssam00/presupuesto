@@ -73,9 +73,11 @@ No debe tomarse como wireframe genérico sino como referencia principal de conti
 
 ## Tests
 
-- Backend (Vitest + Supertest, mockeando la conexión a la BD): `npm run test --prefix backend`
+- Backend (ASP.NET Core + EF Core, xUnit — unitarios con Moq, integración contra Postgres real): `dotnet test backend-dotnet` o `npm run test:backend` desde la raíz
 - Frontend (Vitest + React Testing Library): `npm run test --prefix frontend`
-- End-to-end (Playwright, requiere backend y frontend corriendo — los levanta solo si hace falta): `npm run test:e2e` desde la raíz
+- End-to-end (Playwright, requiere el backend .NET y el frontend corriendo — los levanta solo si hace falta): `npm run test:e2e` desde la raíz
 - Todo junto: `npm run test:all` desde la raíz
+
+Nota: el backend original en Node/Express (`backend/`) fue migrado por completo a ASP.NET Core + EF Core (`backend-dotnet/`) y retirado del repositorio. Queda archivado en el tag de git `archivo-backend-node`.
 
 Los tests e2e corren contra la base de datos Neon real (no hay entorno de test aislado). Crean y eliminan sus propios períodos de prueba con el prefijo `E2E` para no dejar datos residuales.

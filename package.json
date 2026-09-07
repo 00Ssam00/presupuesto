@@ -6,7 +6,7 @@
   "scripts": {
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:backend": "npm run test --prefix backend",
+    "test:backend": "dotnet test backend-dotnet",
     "test:frontend": "npm run test --prefix frontend",
     "test:all": "npm run test:backend && npm run test:frontend && npm run test:e2e"
   },

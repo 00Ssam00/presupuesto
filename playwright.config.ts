@@ -12,13 +12,7 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'npm run dev --prefix backend',
-      url: 'http://localhost:3000/api/health',
-      reuseExistingServer: !process.env.CI,
-      timeout: 30_000,
-    },
-    {
-      // Backend .NET: sirve en español los recursos ya migrados (ver vite.config.ts proxy).
+      // Backend .NET único (Fase 8 — Node ya no existe, ver vite.config.ts proxy).
       command: 'dotnet run --no-launch-profile --project backend-dotnet/src/Quincena.Api --urls http://localhost:5080',
       url: 'http://localhost:5080/api/health',
       reuseExistingServer: !process.env.CI,

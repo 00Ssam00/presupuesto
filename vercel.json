@@ -9,59 +9,12 @@
           "destination": "/index.html"
         }
       ]
-    },
-    "backend": {
-      "root": "backend",
-      "entrypoint": "src/app.ts"
     }
   },
   "rewrites": [
     {
-      "source": "/api/periodos/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/periodos/:path*"
-    },
-    {
-      "source": "/api/categorias/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/categorias/:path*"
-    },
-    {
-      "source": "/api/tarjetas/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/tarjetas/:path*"
-    },
-    {
-      "source": "/api/metodos-pago/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/metodos-pago/:path*"
-    },
-    {
-      "source": "/api/transacciones/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/transacciones/:path*"
-    },
-    {
-      "source": "/api/presupuestos/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/presupuestos/:path*"
-    },
-    {
-      "source": "/api/panel/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/panel/:path*"
-    },
-    {
-      "source": "/api/metas/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/metas/:path*"
-    },
-    {
-      "source": "/api/pagos-proximos/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/pagos-proximos/:path*"
-    },
-    {
-      "source": "/api/ajustes/:path*",
-      "destination": "https://presupuesto-0qma.onrender.com/api/ajustes/:path*"
-    },
-    {
-      "source": "/api(/.*)?",
-      "destination": {
-        "type": "service",
-        "service": "backend"
-      }
+      "source": "/api/:path*",
+      "destination": "https://presupuesto-0qma.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",

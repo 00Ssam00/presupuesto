@@ -6,14 +6,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Recursos ya migrados al backend .NET (rutas en español) — ver vercel.json en producción.
-      '^/api/(periodos|categorias|tarjetas|metodos-pago|transacciones|presupuestos|panel|metas|pagos-proximos|ajustes)': {
-        target: 'http://localhost:5080',
-        changeOrigin: true,
-      },
-      // El resto (nada por ahora — Node queda solo para health-check hasta la Fase 8) sigue en Node.
+      // Backend .NET único (Fase 8 — Node ya no existe, ver vercel.json en producción).
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:5080',
         changeOrigin: true,
       },
     },
