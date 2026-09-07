@@ -23,9 +23,9 @@ namespace Quincena.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pgcrypto");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Quincena.Domain.Entidades.AppSetting", b =>
+            modelBuilder.Entity("Quincena.Domain.Entidades.Ajuste", b =>
                 {
-                    b.Property<string>("Key")
+                    b.Property<string>("Clave")
                         .HasColumnType("text")
                         .HasColumnName("key");
 
@@ -35,12 +35,12 @@ namespace Quincena.Infrastructure.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<string>("Value")
+                    b.Property<string>("Valor")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("value");
 
-                    b.HasKey("Key");
+                    b.HasKey("Clave");
 
                     b.ToTable("app_settings", (string)null);
                 });
@@ -92,7 +92,7 @@ namespace Quincena.Infrastructure.Migrations
                     b.ToTable("categories", (string)null);
                 });
 
-            modelBuilder.Entity("Quincena.Domain.Entidades.Goal", b =>
+            modelBuilder.Entity("Quincena.Domain.Entidades.Meta", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -112,30 +112,30 @@ namespace Quincena.Infrastructure.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<decimal>("CurrentAmount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(12,2)")
-                        .HasDefaultValue(0m)
-                        .HasColumnName("current_amount");
-
-                    b.Property<DateOnly?>("Deadline")
-                        .HasColumnType("date")
-                        .HasColumnName("deadline");
-
                     b.Property<bool>("EstaActivo")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("is_active");
 
+                    b.Property<DateOnly?>("FechaLimite")
+                        .HasColumnType("date")
+                        .HasColumnName("deadline");
+
+                    b.Property<decimal>("MontoActual")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(12,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("current_amount");
+
+                    b.Property<decimal>("MontoObjetivo")
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("target_amount");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
-
-                    b.Property<decimal>("TargetAmount")
-                        .HasColumnType("numeric(12,2)")
-                        .HasColumnName("target_amount");
 
                     b.Property<string>("Tipo")
                         .IsRequired()

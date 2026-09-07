@@ -7,6 +7,9 @@ using Quincena.Application.MetodosPago;
 using Quincena.Application.Periodos;
 using Quincena.Application.Arrastre;
 using Quincena.Application.Transacciones;
+using Quincena.Application.Metas;
+using Quincena.Application.PagosProximos;
+using Quincena.Application.Ajustes;
 
 namespace Quincena.Application;
 
@@ -22,6 +25,9 @@ public static class DependencyInjection
         services.AddScoped<IServicioTransacciones, ServicioTransacciones>();
         services.AddScoped<IServicioPresupuestos, ServicioPresupuestos>();
         services.AddScoped<IServicioPanel, ServicioPanel>();
+        services.AddScoped<IServicioMetas, ServicioMetas>();
+        services.AddScoped<IServicioPagosProximos, ServicioPagosProximos>();
+        services.AddScoped<IServicioAjustes, ServicioAjustes>();
         return services;
     }
 }

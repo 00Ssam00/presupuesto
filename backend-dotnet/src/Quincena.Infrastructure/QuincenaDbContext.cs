@@ -14,9 +14,9 @@ public class QuincenaDbContext : DbContext
     public DbSet<Periodo> Periodos => Set<Periodo>();
     public DbSet<Presupuesto> Presupuestos => Set<Presupuesto>();
     public DbSet<Transaccion> Transacciones => Set<Transaccion>();
-    public DbSet<Goal> Goals => Set<Goal>();
+    public DbSet<Meta> Metas => Set<Meta>();
     public DbSet<PagoProximo> PagosProximos => Set<PagoProximo>();
-    public DbSet<AppSetting> AppSettings => Set<AppSetting>();
+    public DbSet<Ajuste> Ajustes => Set<Ajuste>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,8 +28,8 @@ public class QuincenaDbContext : DbContext
         modelBuilder.ApplyConfiguration(new ConfiguracionPeriodo());
         modelBuilder.ApplyConfiguration(new ConfiguracionPresupuesto());
         modelBuilder.ApplyConfiguration(new ConfiguracionTransaccion());
-        modelBuilder.ApplyConfiguration(new GoalConfiguration());
+        modelBuilder.ApplyConfiguration(new ConfiguracionMeta());
         modelBuilder.ApplyConfiguration(new ConfiguracionPagoProximo());
-        modelBuilder.ApplyConfiguration(new AppSettingConfiguration());
+        modelBuilder.ApplyConfiguration(new ConfiguracionAjuste());
     }
 }

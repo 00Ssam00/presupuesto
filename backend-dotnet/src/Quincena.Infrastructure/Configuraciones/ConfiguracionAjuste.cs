@@ -4,14 +4,14 @@ using Quincena.Domain.Entidades;
 
 namespace Quincena.Infrastructure.Configuraciones;
 
-public class AppSettingConfiguration : IEntityTypeConfiguration<AppSetting>
+public class ConfiguracionAjuste : IEntityTypeConfiguration<Ajuste>
 {
-    public void Configure(EntityTypeBuilder<AppSetting> builder)
+    public void Configure(EntityTypeBuilder<Ajuste> builder)
     {
         builder.ToTable("app_settings");
-        builder.HasKey(s => s.Key);
-        builder.Property(s => s.Key).HasColumnName("key");
-        builder.Property(s => s.Value).HasColumnName("value").IsRequired();
+        builder.HasKey(s => s.Clave);
+        builder.Property(s => s.Clave).HasColumnName("key");
+        builder.Property(s => s.Valor).HasColumnName("value").IsRequired();
         builder.Property(s => s.ActualizadoEn).HasColumnName("updated_at").HasDefaultValueSql("NOW()");
     }
 }
